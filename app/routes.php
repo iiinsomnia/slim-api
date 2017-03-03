@@ -7,7 +7,7 @@ $app->get('/', function ($request, $response, $args) {
     ], 200);
 });
 
-$app->group('/api', function () {
+$app->add(new App\Middlewares\AuthMiddleware)->group('/api', function () {
     $this->group('/v1', function () {
         $this->group('/user', function () {
             $this->get('/detail', '\App\Controllers\V1\UserController:detail');

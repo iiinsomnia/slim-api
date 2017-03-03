@@ -14,9 +14,16 @@ class AuthMiddleware
      */
     public function __invoke($request, $response, $next)
     {
-        $response->getBody()->write('BEFORE');
+        $accessToken = $request->getHeader('Access-Token');
+
+        if (empty($accessToken) || $accessToken[0] != '123456789') {
+            return $response->withJson([
+                'code' => -1,
+                'msg' => 'Invalid token, access failed!',
+            ], 200);
+        }
+
         $response = $next($request, $response);
-        $response->getBody()->write('AFTER');
 
         return $response;
     }
