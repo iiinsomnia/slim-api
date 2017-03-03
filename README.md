@@ -2,7 +2,7 @@
 
 SlimFramework整合NotORM、Predis，用于API开发
 
-### usage
+### 使用：
 
 ```sh
 composer update
