@@ -17,6 +17,21 @@ $container['db'] = function ($c) {
     return $db;
 };
 
+// MongoDB
+$container['mongo'] = function ($c) {
+    $settings = $c->get('settings')['mongo'];
+
+    $dsn = sprintf('mongodb://%s:%s', $settings['host'], $settings['port']);
+
+    if (!empty($settings['username'])) {
+        $dsn = sprintf('mongodb://%s:%s@%s:%s', $settings['username'], $settings['password'], $settings['host'], $settings['port']);
+    }
+
+    $client = new \MongoDB\Client($dsn);
+
+    return $client;
+};
+
 // Predis
 $container['redis'] = function ($c) {
     $settings = $c->get('settings')['redis'];
