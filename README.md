@@ -1,6 +1,6 @@
 # slim-api
 
-SlimFramework整合NotORM、Predis，用于API开发
+SlimFramework整合NotORM、MongoDB、Predis，用于API开发
 
 ### 使用：
 
