@@ -2,41 +2,32 @@
 
 namespace App\Service;
 
-use App\Dao\MySQL\UserDao;
+use App\Dao\Mongo\BookDao;
 use Psr\Container\ContainerInterface;
 
-class User extends Service
+class Book extends Service
 {
     protected $dao;
-    protected $redis;
 
     function __construct(ContainerInterface $di)
     {
         parent::__construct();
 
-        $this->dao = new UserDao($di);
+        $this->dao = new BookDao($di);
         $this->redis = $di->get('redis');
     }
 
     public function handleActionList()
     {
-        $data = $this->dao->findAll();
-        $this->result['data'] = array_values($data);
+        $data = $this->dao->find();
+        $this->result['data'] = $data;
 
         return $this->result;
     }
 
     public function handleActionDetail($id)
     {
-        $cache = $this->redis->hget('user', $id);
-
-        if (!empty($cache)) {
-            $this->result['data'] = json_decode($cache);
-
-            return $this->result;
-        }
-
-        $data = $this->dao->findById($id);
+        $data = $this->dao->findOne(['_id' => intval($id)]);
 
         if (!$data) {
             $this->result['data'] = [];
@@ -44,7 +35,6 @@ class User extends Service
             return $this->result;
         }
 
-        $this->redis->hset('user', $id, json_encode($data));
         $this->result['data'] = $data;
 
         return $this->result;
@@ -52,23 +42,23 @@ class User extends Service
 
     public function handleActionAdd($data)
     {
-        $row = $this->dao->insert($data);
+        $id = $this->dao->insertOne($data);
 
-        if (!$row) {
+        if (!$id) {
             $this->result['code'] = -1;
             $this->result['msg'] = 'failed';
 
             return $this->result;
         }
 
-        $this->result['data'] = $row;
+        $this->result['data'] = $id;
 
         return $this->result;
     }
 
     public function handleActionUpdate($id, $data)
     {
-        $result = $this->dao->updateById($id, $data);
+        $result = $this->dao->updateOne(['_id' => intval($id)], $data);
 
         if (!$result) {
             $this->result['code'] = -1;
@@ -80,7 +70,7 @@ class User extends Service
 
     public function handleActionDelete($id)
     {
-        $result = $this->dao->deleteById($id);
+        $result = $this->dao->deleteOne(['_id' => intval($id)]);
 
         if (!$result) {
             $this->result['code'] = -1;

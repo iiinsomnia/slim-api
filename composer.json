@@ -19,7 +19,8 @@
         "vlucas/phpdotenv": "^2.4",
         "vrana/notorm": "dev-master",
         "mongodb/mongodb": "^1.1",
-        "predis/predis": "^1.1"
+        "predis/predis": "^1.1",
+        "php-curl-class/php-curl-class": "^7.2"
     },
     "require-dev": {
         "phpunit/phpunit": ">=4.8 < 6.0"

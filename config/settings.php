@@ -5,11 +5,6 @@ return [
         'displayErrorDetails' => env('APP_DEBUG', true), // set to false in production
         'addContentLengthHeader' => false, // Allow the web server to send the content-length header
 
-        // Renderer settings
-        'renderer' => [
-            'template_path' => __DIR__ . '/../templates/',
-        ],
-
         // NotORM settings
         'db' => [
             'host' => env('DB_HOST', '127.0.0.1'),
