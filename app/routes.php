@@ -20,3 +20,4 @@ $app->add(\App\Middlewares\AuthMiddleware::class)->group('/v1', function () {
     $this->put('/books/{id}', '\App\Controllers\V1\BookController:actionUpdate');
     $this->delete('/books/{id}', '\App\Controllers\V1\BookController:actionDelete');
 });
+?>
