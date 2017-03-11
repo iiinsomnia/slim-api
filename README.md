@@ -5,7 +5,7 @@ SlimFramework整合NotORM、MongoDB、Predis，用于API开发，支持CLI-Comma
 ### 使用：
 
 ```sh
-#获取框架和所依赖的库
+#get the framework and dependency libraries
 composer update
 ```
 
@@ -21,9 +21,9 @@ Hello IIInsomnia
 * Ensure `logs/` is web writeable.
 
 ### 参考
-[NotORM](http://www.notorm.com/)
-[MongoDB](https://docs.mongodb.com/php-library/master/tutorial/install-php-library/)
-[Predis](https://packagist.org/packages/predis/predis)
-[CLI-Command](http://symfony.com/doc/current/components/console.html)
+* [NotORM](http://www.notorm.com/)
+* [MongoDB](https://docs.mongodb.com/php-library/master/tutorial/)
+* [Predis](https://packagist.org/packages/predis/predis)
+* [CLI-Command](http://symfony.com/doc/current/components/console.html)
 
 
