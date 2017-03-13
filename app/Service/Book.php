@@ -5,79 +5,76 @@ namespace App\Service;
 use App\Dao\Mongo\BookDao;
 use Psr\Container\ContainerInterface;
 
-class Book extends Service
+class Book
 {
     protected $dao;
 
     function __construct(ContainerInterface $di)
     {
-        parent::__construct();
-
         $this->dao = new BookDao($di);
         $this->redis = $di->get('redis');
     }
 
-    public function handleActionList()
+    public function handleActionList(&$resCode, &$resMsg, &$resData)
     {
-        $data = $this->dao->find();
-        $this->result['data'] = $data;
+        $dbData = $this->dao->find();
+        $resData = $dbData;
 
-        return $this->result;
+        return;
     }
 
-    public function handleActionDetail($id)
+    public function handleActionDetail($id, &$resCode, &$resMsg, &$resData)
     {
-        $data = $this->dao->findOne(['_id' => intval($id)]);
+        $dbData = $this->dao->findOne(['_id' => intval($id)]);
 
-        if (!$data) {
-            $this->result['data'] = [];
-
-            return $this->result;
+        if (!$dbData) {
+            $resData = [];
+            return;
         }
 
-        $this->result['data'] = $data;
+        $resData = $dbData;
 
-        return $this->result;
+        return;
     }
 
-    public function handleActionAdd($data)
+    public function handleActionAdd($postData, &$resCode, &$resMsg, &$resData)
     {
-        $id = $this->dao->insertOne($data);
+        $id = $this->dao->insertOne($postData);
 
         if (!$id) {
-            $this->result['code'] = -1;
-            $this->result['msg'] = 'failed';
+            $resCode = -1;
+            $resMsg = 'failed';
 
-            return $this->result;
+            return;
         }
 
-        $this->result['data'] = $id;
+        $resData = $id;
 
-        return $this->result;
+        return;
     }
 
-    public function handleActionUpdate($id, $data)
+    public function handleActionUpdate($id, $putData, &$resCode, &$resMsg)
     {
-        $result = $this->dao->updateOne(['_id' => intval($id)], $data);
+        $result = $this->dao->updateOne(['_id' => intval($id)], $resData);
 
         if (!$result) {
-            $this->result['code'] = -1;
-            $this->result['msg'] = 'failed';
+            $resCode = -1;
+            $resMsg = 'failed';
         }
 
-        return $this->result;
+        return;
     }
 
-    public function handleActionDelete($id)
+    public function handleActionDelete($id, &$resCode, &$resMsg)
     {
         $result = $this->dao->deleteOne(['_id' => intval($id)]);
 
         if (!$result) {
-            $this->result['code'] = -1;
-            $this->result['msg'] = 'failed';
+            $resCode = -1;
+            $resMsg = 'failed';
         }
 
-        return $this->result;
+        return;
     }
 }
 ?>

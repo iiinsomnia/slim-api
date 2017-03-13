@@ -5,89 +5,85 @@ namespace App\Service;
 use App\Dao\MySQL\UserDao;
 use Psr\Container\ContainerInterface;
 
-class User extends Service
+class User
 {
     protected $dao;
     protected $redis;
 
     function __construct(ContainerInterface $di)
     {
-        parent::__construct();
-
         $this->dao = new UserDao($di);
         $this->redis = $di->get('redis');
     }
 
-    public function handleActionList()
+    public function handleActionList(&$resCode, &$resMsg, &$resData)
     {
-        $data = $this->dao->findAll();
-        $this->result['data'] = array_values($data);
+        $dbData = $this->dao->findAll();
+        $resData = array_values($dbData);
 
-        return $this->result;
+        return;
     }
 
-    public function handleActionDetail($id)
+    public function handleActionDetail($id, &$resCode, &$resMsg, &$resData)
     {
         $cache = $this->redis->hget('user', $id);
 
         if (!empty($cache)) {
-            $this->result['data'] = json_decode($cache);
-
-            return $this->result;
+            $resData = json_deresCode($cache);
+            return;
         }
 
-        $data = $this->dao->findById($id);
+        $dbData = $this->dao->findById($id);
 
-        if (!$data) {
-            $this->result['data'] = [];
-
-            return $this->result;
+        if (!$dbData) {
+            $resData = [];
+            return;
         }
 
-        $this->redis->hset('user', $id, json_encode($data));
-        $this->result['data'] = $data;
+        $this->redis->hset('user', $id, json_enresCode($dbData));
+        $resData = $dbData;
 
-        return $this->result;
+        return;
     }
 
-    public function handleActionAdd($data)
+    public function handleActionAdd($postData, &$resCode, &$resMsg, &$resData)
     {
-        $row = $this->dao->insert($data);
+        $row = $this->dao->insert($postData);
 
         if (!$row) {
-            $this->result['code'] = -1;
-            $this->result['msg'] = 'failed';
+            $resCode = -1;
+            $resMsg = 'failed';
 
-            return $this->result;
+            return;
         }
 
-        $this->result['data'] = $row;
+        $resData = $row;
 
-        return $this->result;
+        return;
     }
 
-    public function handleActionUpdate($id, $data)
+    public function handleActionUpdate($id, $putData, &$resCode, &$resMsg)
     {
-        $result = $this->dao->updateById($id, $data);
+        $result = $this->dao->updateById($id, $putData);
 
         if (!$result) {
-            $this->result['code'] = -1;
-            $this->result['msg'] = 'failed';
+            $resCode = -1;
+            $resMsg = 'failed';
         }
 
-        return $this->result;
+        return;
     }
 
-    public function handleActionDelete($id)
+    public function handleActionDelete($id, &$resCode, &$resMsg)
     {
         $result = $this->dao->deleteById($id);
 
         if (!$result) {
-            $this->result['code'] = -1;
-            $this->result['msg'] = 'failed';
+            $resCode = -1;
+            $resMsg = 'failed';
         }
 
-        return $this->result;
+        return;
     }
 }
 ?>

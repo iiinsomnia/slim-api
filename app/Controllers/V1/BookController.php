@@ -12,41 +12,40 @@ class BookController extends BaseController
 
     // constructor receives container instance
     function __construct(ContainerInterface $di) {
+        parent::__construct();
+
         $this->di = $di;
         $this->book = new Book($di);
     }
 
     public function actionList($request, $response, $args) {
         // $query = $request->getQueryParams();
-        $result = $this->book->handleActionList();
-
-        return $this->json($response, $result['code'], $result['msg'], $result['data']);
+        $this->book->handleActionList($this->code, $this->msg, $this->data);
+        return $this->json($response);
     }
 
     public function actionDetail($request, $response, $args) {
-        $result = $this->book->handleActionDetail($args['id']);
-
-        return $this->json($response, $result['code'], $result['msg'], $result['data']);
+        $this->book->handleActionDetail($args['id'], $this->code, $this->msg, $this->data);
+        return $this->json($response);
     }
 
     public function actionAdd($request, $response, $args) {
-        $data = $request->getParsedBody();
-        $result = $this->book->handleActionAdd($data);
+        $postData = $request->getParsedBody();
+        $this->book->handleActionAdd($postData, $this->code, $this->msg, $this->data);
 
-        return $this->json($response, $result['code'], $result['msg'], $result['data']);
+        return $this->json($response);
     }
 
     public function actionUpdate($request, $response, $args) {
-        $data = $request->getParsedBody();
-        $result = $this->book->handleActionUpdate($args['id'], $data);
+        $putData = $request->getParsedBody();
+        $this->book->handleActionUpdate($args['id'], $putData, $this->code, $this->msg);
 
-        return $this->json($response, $result['code'], $result['msg'], $result['data']);
+        return $this->json($response);
     }
 
     public function actionDelete($request, $response, $args) {
-        $result = $this->book->handleActionDelete($args['id']);
-
-        return $this->json($response, $result['code'], $result['msg'], $result['data']);
+        $this->book->handleActionDelete($args['id'], $this->code, $this->msg);
+        return $this->json($response);
     }
 }
 ?>
