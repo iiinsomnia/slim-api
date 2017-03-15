@@ -5,22 +5,28 @@ SlimFramework整合NotORM、MongoDB、Predis，用于API开发，支持CLI-Comma
 ### 使用：
 
 ```sh
-#get the framework and dependency libraries
+# get the framework and dependency libraries
 composer update
 ```
 
 ```sh
-#cli-command
+# cli-command
 php cli greet IIInsomnia
 
-#output
+# output
 Hello IIInsomnia
+```
+
+```sh
+# display help message
+php cli greet -h
 ```
 
 * Point your virtual host document root to your new application's `public/` directory.
 * Ensure `logs/` is web writeable.
 
 ### 参考
+* [Slim](http://www.slimphp.net/)
 * [NotORM](http://www.notorm.com/)
 * [MongoDB](https://docs.mongodb.com/php-library/master/tutorial/)
 * [Predis](https://packagist.org/packages/predis/predis)
