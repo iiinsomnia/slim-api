@@ -12,7 +12,6 @@ $container['db'] = function ($c) {
     $pdo->exec(sprintf('set names %s', $settings['charset']));
 
     $db = new NotORM($pdo);
-    $db->debug = $c->get('settings')['debug'];
 
     return $db;
 };
