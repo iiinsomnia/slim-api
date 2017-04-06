@@ -10,7 +10,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class GreetCommand extends Command
 {
-    protected $di;
+    private $_di;
 
     protected $commandName = 'greet';
     protected $commandDescription = "Greets Someone";
@@ -25,7 +25,7 @@ class GreetCommand extends Command
     {
         parent::__construct();
 
-        $this->di = $di;
+        $this->_di = $di;
     }
 
     protected function configure()

@@ -5,27 +5,31 @@ namespace App\Service;
 use App\Dao\Mongo\BookDao;
 use Psr\Container\ContainerInterface;
 
-class Book
+class Book extends IIInsomnia
 {
-    protected $dao;
+    private $_di;
 
     function __construct(ContainerInterface $di)
     {
-        $this->dao = new BookDao($di);
-        $this->redis = $di->get('redis');
+        $this->_di = $di;
     }
 
+    // 处理书籍列表请求
     public function handleActionList(&$resCode, &$resMsg, &$resData)
     {
-        $dbData = $this->dao->find();
+        $bookDao = new BookDao($this->_di);
+        $dbData = $bookDao->find();
+
         $resData = $dbData;
 
         return;
     }
 
+    // 处理书籍详情请求
     public function handleActionDetail($id, &$resCode, &$resMsg, &$resData)
     {
-        $dbData = $this->dao->findOne(['_id' => intval($id)]);
+        $bookDao = new BookDao($this->_di);
+        $dbData = $bookDao->findOne(['_id' => intval($id)]);
 
         if (!$dbData) {
             $resData = [];
@@ -37,9 +41,11 @@ class Book
         return;
     }
 
+    // 处理书籍添加请求
     public function handleActionAdd($postData, &$resCode, &$resMsg, &$resData)
     {
-        $id = $this->dao->insertOne($postData);
+        $bookDao = new BookDao($this->_di);
+        $id = $bookDao->insertOne($postData);
 
         if (!$id) {
             $resCode = -1;
@@ -53,9 +59,11 @@ class Book
         return;
     }
 
+    // 处理书籍编辑请求
     public function handleActionUpdate($id, $putData, &$resCode, &$resMsg)
     {
-        $result = $this->dao->updateOne(['_id' => intval($id)], $resData);
+        $bookDao = new BookDao($this->_di);
+        $result = $bookDao->updateOne(['_id' => intval($id)], $resData);
 
         if (!$result) {
             $resCode = -1;
@@ -65,9 +73,11 @@ class Book
         return;
     }
 
+    // 处理书籍删除请求
     public function handleActionDelete($id, &$resCode, &$resMsg)
     {
-        $result = $this->dao->deleteOne(['_id' => intval($id)]);
+        $bookDao = new BookDao($this->_di);
+        $result = $bookDao->deleteOne(['_id' => intval($id)]);
 
         if (!$result) {
             $resCode = -1;

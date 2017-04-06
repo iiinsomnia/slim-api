@@ -6,26 +6,48 @@ use Psr\Container\ContainerInterface;
 
 class UserDao extends BaseDao
 {
-    protected $db;
-    protected $logger;
+    private $_db;
 
     // constructor receives container instance
-    public function __construct(ContainerInterface $di) {
-        $this->db = $di->get('db');
-        $this->logger = $di->get('logger');
-    }
-
-    public function findAll()
+    public function __construct(ContainerInterface $di)
     {
-        $rows = $this->db->user();
-        $data = $this->iterator2Array($rows, true);
-
-        return $data;
+        $this->_db = $di->get('db');
     }
 
     public function findById($id)
     {
-        $row = $this->db->user()->where('id = ?', $id)->fetch();
+        $row = $this->_db->user()->where('id = ?', $id)->fetch();
+
+        if (empty($row)) {
+            return [];
+        }
+
+        $data = $this->iterator2Array($row);
+
+        return $data;
+    }
+
+    public function findByName($name)
+    {
+        $row = $this->_db->user()->where('name = ?', $name)->fetch();
+
+        if (empty($row)) {
+            return [];
+        }
+
+        $data = $this->iterator2Array($row);
+
+        return $data;
+    }
+
+    public function findByPhone($phone)
+    {
+        $row = $this->_db->user()->where('phone = ?', $phone)->fetch();
+
+        if (empty($row)) {
+            return [];
+        }
+
         $data = $this->iterator2Array($row);
 
         return $data;
@@ -33,45 +55,20 @@ class UserDao extends BaseDao
 
     public function insert($data)
     {
-        try {
-            $result = $this->db->user()->insert($data);
+        $result = $this->_db->user()->insert($data);
 
-            return $result;
-        } catch (Exception $e) {
-            $this->logger->error($e->getMessage());
-
-            return false;
-        }
+        return $result;
     }
 
     public function updateById($id, $data)
     {
-        try {
-            $result = $this->db->user()->where('id = ?', $id)->update($data);
+        $result = $this->_db->user()->where('id = ?', $id)->update($data);
 
-            if ($result === false) {
-                return false;
-            }
-
-            return true;
-        } catch (Exception $e) {
-            $this->logger->error($e->getMessage());
-
+        if ($result === false) {
             return false;
         }
-    }
 
-    public function deleteById($id)
-    {
-        try {
-            $result = $this->db->user()->where('id = ?', $id)->delete();
-
-            return $result;
-        } catch (Exception $e) {
-            $this->logger->error($e->getMessage());
-
-            return false;
-        }
+        return true;
     }
 }
 ?>

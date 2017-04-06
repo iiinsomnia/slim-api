@@ -11,7 +11,11 @@ $container['db'] = function ($c) {
     $pdo = new PDO($dsn, $settings['username'], $settings['password']);
     $pdo->exec(sprintf('set names %s', $settings['charset']));
 
-    $db = new NotORM($pdo);
+    $structure = new NotORM_Structure_Convention('id', '%s_id', '%s', $settings['prefix']);
+
+    $db = new NotORM($pdo, $structure);
+
+    // $db->debug = true;
 
     return $db;
 };

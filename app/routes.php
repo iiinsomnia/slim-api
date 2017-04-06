@@ -7,12 +7,17 @@ $app->get('/', function ($request, $response, $args) {
     ], 200);
 });
 
+$app->post('/login', '\App\Controllers\AuthController:actionLogin')->add(\App\Middlewares\HeaderMiddleware::class);
+$app->get('/logout', '\App\Controllers\AuthController:actionLogout')->add(\App\Middlewares\HeaderMiddleware::class);
+
 $app->group('/v1', function () {
-    $this->get('/users', '\App\Controllers\V1\UserController:actionList');
-    $this->get('/users/{id}', '\App\Controllers\V1\UserController:actionDetail');
-    $this->post('/users', '\App\Controllers\V1\UserController:actionAdd');
-    $this->put('/users/{id}', '\App\Controllers\V1\UserController:actionUpdate');
-    $this->delete('/users/{id}', '\App\Controllers\V1\UserController:actionDelete');
+    $this->get('/userinfo', '\App\Controllers\V1\UserController:actionView');
+
+    $this->get('/articles', '\App\Controllers\V1\ArticleController:actionList');
+    $this->get('/articles/{id}', '\App\Controllers\V1\ArticleController:actionDetail');
+    $this->post('/articles', '\App\Controllers\V1\ArticleController:actionAdd');
+    $this->put('/articles/{id}', '\App\Controllers\V1\ArticleController:actionUpdate');
+    $this->delete('/articles/{id}', '\App\Controllers\V1\ArticleController:actionDelete');
 
     $this->get('/books', '\App\Controllers\V1\BookController:actionList');
     $this->get('/books/{id}', '\App\Controllers\V1\BookController:actionDetail');

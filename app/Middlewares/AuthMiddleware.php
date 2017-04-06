@@ -1,8 +1,22 @@
 <?php
 namespace App\Middlewares;
 
+use App\Cache\AuthCache;
+use Psr\Container\ContainerInterface;
+
 class AuthMiddleware
 {
+    private $_di;
+
+    protected $code;
+    protected $msg;
+
+    function __construct(ContainerInterface $di) {
+        $this->_di = $di;
+        $this->code = 0;
+        $this->msg = 'success';
+    }
+
     /**
      * Example middleware invokable class
      *
@@ -14,17 +28,100 @@ class AuthMiddleware
      */
     public function __invoke($request, $response, $next)
     {
-        $accessToken = $request->getHeader('Access-Token');
+        $accessSign = $request->getHeader('Access-Sign');
+        $accessTime = $request->getHeader('Access-Time');
+        $uuid = $request->getHeader('Access-UUID');
 
-        if (empty($accessToken) || $accessToken[0] != '123456789') {
+        if (empty($accessSign) || empty($accessTime) || empty($uuid)) {
             return $response->withJson([
                 'code' => -1,
                 'msg' => 'Invalid token, access failed!',
             ], 200);
         }
 
+        // 登录验证
+        $login = $this->validateLogin($uuid[0]);
+
+        if (!$login) {
+            return $response->withJson([
+                'code' => $this->code,
+                'msg' => $this->msg,
+            ], 200);
+        }
+
+        // 验签
+        $query = $request->getUri()->getQuery();
+        $success = $this->validateSign($uuid[0], $accessTime[0], $accessSign[0], $query);
+
+        if (!$success) {
+            return $response->withJson([
+                'code' => $this->code,
+                'msg' => $this->msg,
+            ], 200);
+        }
+
         $response = $next($request, $response);
 
         return $response;
+    }
+
+    // 验证登录
+    protected function validateLogin($uuid)
+    {
+        $authCache = new AuthCache($this->_di);
+        $loginInfo = $authCache->getAuthCache($uuid);
+
+        if (empty($loginInfo)) {
+            $this->code = 403;
+            $this->msg = '用户未登录';
+
+            return false;
+        }
+
+        if ($loginInfo['expire_time'] > 0 && $loginInfo['expire_time'] <= time()) {
+            $this->code = 403;
+            $this->msg = '登录已过期';
+
+            return false;
+        }
+
+        return true;
+    }
+
+    // 验签
+    protected function validateSign($uuid, $accessTime, $accessSign, $query)
+    {
+        $accessExpire = env('ACCESS_EXPIRE', 0);
+
+        if (is_numeric($accessExpire) && $accessExpire > 0) {
+            if (time() - $accessTime >= $accessExpire) {
+                $this->code = -1;
+                $this->msg = '请求已失效';
+
+                return false;
+            }
+        }
+
+        $authCache = new AuthCache($this->_di);
+        $token = $authCache->getAuthToken($uuid);
+
+        $signString = '';
+        $route = str_replace('r=', '/', $query);
+        $parseUrl = parse_url($route);
+
+        if (empty($parseUrl['query'])) {
+            $signString = sprintf('%s?token=%s&timestamp=%s', $route, $token, $accessTime);
+        } else {
+            $signString = sprintf('%s&token=%s&timestamp=%s', $route, $token, $accessTime);
+        }
+
+        if (strtolower($accessSign) != md5($signString)) {
+            $this->code = -1;
+            $this->msg = '验签失败';
+
+            return false;
+        }
+
+        return true;
     }
 }
