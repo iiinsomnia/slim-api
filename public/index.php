@@ -4,6 +4,7 @@ if (PHP_SAPI == 'cli-server') {
     // something which should probably be served as a static file
     $url  = parse_url($_SERVER['REQUEST_URI']);
     $file = __DIR__ . $url['path'];
+
     if (is_file($file)) {
         return false;
     }
