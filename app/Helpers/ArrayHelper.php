@@ -1,6 +1,10 @@
 <?php
 namespace App\Helpers;
 
+/**
+ * 数组辅助类，更方便的处理数组逻辑
+ * 该类来源于yii2，具体使用可以参考方法注释或yii2文档
+ */
 class ArrayHelper
 {
     /**

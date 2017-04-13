@@ -13,7 +13,7 @@ require __DIR__ . '/../vendor/autoload.php';
 
 require __DIR__ . '/../bootstrap/env.php';
 
-session_start();
+// session_start();
 
 // Instantiate the app
 $settings = require __DIR__ . '/../config/settings.php';
