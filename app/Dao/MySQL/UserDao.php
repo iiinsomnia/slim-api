@@ -1,74 +1,59 @@
 <?php
 namespace App\Dao\MySQL;
 
-use App\Dao\BaseDao;
+use App\Dao\MysqlDao;
 use Psr\Container\ContainerInterface;
 
-class UserDao extends BaseDao
+class UserDao extends MysqlDao
 {
-    private $_db;
-
     // constructor receives container instance
     public function __construct(ContainerInterface $di)
     {
-        $this->_db = $di->get('db');
+        parent::__construct($di, 'user');
     }
 
-    public function findById($id)
+    public function findUserById($id)
     {
-        $row = $this->_db->user()->where('id = ?', $id)->fetch();
-
-        if (empty($row)) {
-            return [];
-        }
-
-        $data = $this->iterator2Array($row);
+        $data = $this->findOne([
+                'where' => 'id = :id',
+            ], [':id' => $id]);
 
         return $data;
     }
 
-    public function findByName($name)
+    public function findUserByName($name)
     {
-        $row = $this->_db->user()->where('name = ?', $name)->fetch();
-
-        if (empty($row)) {
-            return [];
-        }
-
-        $data = $this->iterator2Array($row);
+        $data = $this->findOne([
+                'where' => 'name = :name',
+            ], [':name' => $name]);
 
         return $data;
     }
 
-    public function findByPhone($phone)
+    public function findUserByPhone($phone)
     {
-        $row = $this->_db->user()->where('phone = ?', $phone)->fetch();
-
-        if (empty($row)) {
-            return [];
-        }
-
-        $data = $this->iterator2Array($row);
+        $data = $this->findOne([
+                'where' => 'phone = :phone',
+            ], [':phone' => $phone]);
 
         return $data;
     }
 
-    public function insert($data)
+    public function addNewUser($data)
     {
-        $result = $this->_db->user()->insert($data);
+        $result = $this->insert($data);
 
         return $result;
     }
 
-    public function updateById($id, $data)
+    public function updateUserById($id, $data)
     {
-        $result = $this->_db->user()->where('id = ?', $id)->update($data);
+        $result = $this->update([
+                'where' => 'id = :id',
+                'binds' => [':id' => $id],
+            ], $data);
 
-        if ($result === false) {
-            return false;
-        }
-
-        return true;
+        return $result;
     }
 }
 ?>

@@ -18,7 +18,7 @@ class Book extends IIInsomnia
     public function handleActionList(&$resCode, &$resMsg, &$resData)
     {
         $bookDao = new BookDao($this->_di);
-        $dbData = $bookDao->find();
+        $dbData = $bookDao->getAllBooks();
 
         $resData = $dbData;
 
@@ -29,7 +29,7 @@ class Book extends IIInsomnia
     public function handleActionDetail($id, &$resCode, &$resMsg, &$resData)
     {
         $bookDao = new BookDao($this->_di);
-        $dbData = $bookDao->findOne(['_id' => intval($id)]);
+        $dbData = $bookDao->getBookById(['_id' => intval($id)]);
 
         if (!$dbData) {
             $resData = [];
@@ -45,7 +45,7 @@ class Book extends IIInsomnia
     public function handleActionAdd($postData, &$resCode, &$resMsg, &$resData)
     {
         $bookDao = new BookDao($this->_di);
-        $id = $bookDao->insertOne($postData);
+        $id = $bookDao->addNewBook($postData);
 
         if (!$id) {
             $resCode = -1;
@@ -63,7 +63,7 @@ class Book extends IIInsomnia
     public function handleActionUpdate($id, $putData, &$resCode, &$resMsg)
     {
         $bookDao = new BookDao($this->_di);
-        $result = $bookDao->updateOne(['_id' => intval($id)], $resData);
+        $result = $bookDao->updateBookById(['_id' => intval($id)], $resData);
 
         if (!$result) {
             $resCode = -1;
@@ -77,7 +77,7 @@ class Book extends IIInsomnia
     public function handleActionDelete($id, &$resCode, &$resMsg)
     {
         $bookDao = new BookDao($this->_di);
-        $result = $bookDao->deleteOne(['_id' => intval($id)]);
+        $result = $bookDao->deleteBookById(['_id' => intval($id)]);
 
         if (!$result) {
             $resCode = -1;

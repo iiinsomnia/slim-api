@@ -3,7 +3,7 @@
 namespace App\Service;
 
 use App\Cache\ArticleCache;
-use App\Dao\MySQL\UserDao;
+use App\Dao\MySQL\ArticleDao;
 use Psr\Container\ContainerInterface;
 
 class Article extends IIInsomnia
@@ -21,9 +21,9 @@ class Article extends IIInsomnia
     public function handleActionList(&$resCode, &$resMsg, &$resData)
     {
         $articleDao = new ArticleDao($this->_di);
-        $dbData = $articleDao->findAll();
+        $dbData = $articleDao->getAllArticles();
 
-        $resData = array_values($dbData);
+        $resData = $dbData;
 
         return;
     }
@@ -40,10 +40,10 @@ class Article extends IIInsomnia
         }
 
         $articleDao = new ArticleDao($this->_di);
-        $dbData = $articleDao->findById($id);
+        $dbData = $articleDao->getArticleById($id);
 
-        if (!$dbData) {
-            $resData = [];
+        if (empty($dbData)) {
+            $resData = null;
             return;
         }
 
@@ -58,16 +58,16 @@ class Article extends IIInsomnia
     public function handleActionAdd($postData, &$resCode, &$resMsg, &$resData)
     {
         $articleDao = new ArticleDao($this->_di);
-        $row = $articleDao->insert($postData);
+        $id = $articleDao->addNewArticle($postData);
 
-        if (!$row) {
+        if (!$id) {
             $resCode = -1;
             $resMsg = 'failed';
 
             return;
         }
 
-        $resData = $row;
+        $resData = $id;
 
         return;
     }
@@ -80,7 +80,7 @@ class Article extends IIInsomnia
         $articleCache->delArticleCache($id);
 
         $articleDao = new ArticleDao($this->_di);
-        $result = $articleDao->updateById($id, $putData);
+        $result = $articleDao->updateArticleById($id, $putData);
 
         if (!$result) {
             $resCode = -1;
@@ -98,7 +98,7 @@ class Article extends IIInsomnia
         $articleCache->delArticleCache($id);
 
         $articleDao = new ArticleDao($this->_di);
-        $result = $articleDao->deleteById($id);
+        $result = $articleDao->deleteArticleById($id);
 
         if (!$result) {
             $resCode = -1;

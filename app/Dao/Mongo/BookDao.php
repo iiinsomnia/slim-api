@@ -1,130 +1,59 @@
 <?php
 namespace App\Dao\Mongo;
 
-use App\Dao\BaseDao;
+use App\Dao\MongoDao;
 use Psr\Container\ContainerInterface;
 
-class BookDao extends BaseDao
+class BookDao extends MongoDao
 {
-    private $_di;
-    private $_mongo;
-
     // constructor receives container instance
     public function __construct(ContainerInterface $di){
-        $this->_di = $di;
-        $this->_mongo = $di->get('mongo');
+        parent::__construct($di, 'book');
     }
 
-    public function find($query = [])
+    public function getAllBooks()
     {
-        $collection = $this->_mongo->library->book;
-        $cursor = $collection->find($query);
-
-        $data = [];
-
-        foreach ($cursor as $doc) {
-           $data[] = $doc;
-        }
+        $data = $this->findAll();
 
         return $data;
     }
 
-    public function findOne($query)
+    public function getBookById($id)
     {
-        $collection = $this->_mongo->library->book;
-        $data = $collection->findOne($query);
+        $data = $this->findOne(['_id' => intval($id)]);
 
         return $data;
     }
 
-    public function insertOne($data)
+    public function getBooksByTitle($title)
     {
-        $collection = $this->_mongo->library->book;
+        $regex = new \MongoDB\BSON\Regex(sprintf(".*%s.*", $title));
+        $data = $this->find(['title' => $regex]);
 
-        try {
-            $id = $this->refreshSequence($this->_mongo->library->sequence, 'book');
-            $data['_id'] = $id;
-            $result = $collection->insertOne($data);
-
-            return $result->getInsertedId();
-        } catch (MongoDB\Exception\InvalidArgumentException $e) {
-            $logger = $this->_di->get('logger');
-            $logger->error($e->getMessage());
-
-            return false;
-        } catch (MongoDB\Driver\Exception\BulkWriteException $e) {
-            $logger = $this->_di->get('logger');
-            $logger->error($e->getMessage());
-
-            return false;
-        } catch (MongoDB\Driver\Exception\RuntimeException $e) {
-            $logger = $this->_di->get('logger');
-            $logger->error($e->getMessage());
-
-            return false;
-        }
+        return $data;
     }
 
-    public function updateOne($query, $data)
+    public function addNewBook($data)
     {
-        $collection = $this->_mongo->library->book;
+        $result = [$data, $data, $data];
 
-        try {
-            $result = $collection->updateOne($query, ['$set' => $data]);
+        $result = $this->batchInsert($result);
 
-            return $result;
-        } catch (MongoDB\Exception\UnsupportedException $e) {
-            $logger = $this->_di->get('logger');
-            $logger->error($e->getMessage());
-
-            return false;
-        } catch (MongoDB\Exception\InvalidArgumentException $e) {
-            $logger = $this->_di->get('logger');
-            $logger->error($e->getMessage());
-
-            return false;
-        } catch (MongoDB\Driver\Exception\BulkWriteException $e) {
-            $logger = $this->_di->get('logger');
-            $logger->error($e->getMessage());
-
-            return false;
-        } catch (MongoDB\Driver\Exception\RuntimeException $e) {
-            $logger = $this->_di->get('logger');
-            $logger->error($e->getMessage());
-
-            return false;
-        }
+        return $result;
     }
 
-    public function deleteOne($query)
+    public function updateBookById($id, $data)
     {
-        $collection = $this->_mongo->library->book;
+        $result = $this->update(['_id' => intval($id)], $data);
 
-        try {
-            $result = $collection->deleteOne($query);
+        return $result;
+    }
 
-            return $result;
-        } catch (MongoDB\Exception\UnsupportedException $e) {
-            $logger = $this->_di->get('logger');
-            $logger->error($e->getMessage());
+    public function deleteBookById($id)
+    {
+        $result = $this->delete(['_id' => intval($id)]);
 
-            return false;
-        } catch (MongoDB\Exception\InvalidArgumentException $e) {
-            $logger = $this->_di->get('logger');
-            $logger->error($e->getMessage());
-
-            return false;
-        } catch (MongoDB\Driver\Exception\BulkWriteException $e) {
-            $logger = $this->_di->get('logger');
-            $logger->error($e->getMessage());
-
-            return false;
-        } catch (MongoDB\Driver\Exception\RuntimeException $e) {
-            $logger = $this->_di->get('logger');
-            $logger->error($e->getMessage());
-
-            return false;
-        }
+        return $result;
     }
 }
 ?>

@@ -1,6 +1,6 @@
 # slim-api
 
-SlimFramework整合NotORM、MongoDB、Predis，用于API开发，支持CLI-Command
+SlimFramework整合Laravel/Database、MongoDB、Predis，用于API开发，支持CLI-Command
 
 ### 使用：
 
@@ -27,7 +27,7 @@ php cli greet -h
 
 ### 参考
 * [Slim](http://www.slimphp.net/)
-* [NotORM](http://www.notorm.com/)
+* [Laravel/Database](https://laravel.com/docs/5.4/database)
 * [MongoDB](https://docs.mongodb.com/php-library/master/tutorial/)
 * [Predis](https://packagist.org/packages/predis/predis)
 * [CLI-Command](http://symfony.com/doc/current/components/console.html)

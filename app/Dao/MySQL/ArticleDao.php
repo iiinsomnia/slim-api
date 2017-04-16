@@ -1,77 +1,55 @@
 <?php
 namespace App\Dao\MySQL;
 
-use App\Dao\BaseDao;
+use App\Dao\MysqlDao;
 use Psr\Container\ContainerInterface;
 
-class ArticleDao extends BaseDao
+class ArticleDao extends MysqlDao
 {
-    private $_db;
-
     // constructor receives container instance
     public function __construct(ContainerInterface $di)
     {
-        $this->_db = $di->get('db');
+        parent::__construct($di, 'article');
     }
 
-    public function findAll()
+    public function getAllArticles()
     {
-        $rows = $this->_db->article();
-
-        $data = $this->iterator2Array($rows, true);
-
-        return !empty($data) ? $data : [];
-    }
-
-    public function findById($id)
-    {
-        $row = $this->_db->article()->where('id = ?', $id)->fetch();
-
-        if (empty($row)) {
-            return [];
-        }
-
-        $data = $this->iterator2Array($row);
+        $data = $this->findAll();
 
         return $data;
     }
 
-    public function findByName($name)
+    public function getArticleById($id)
     {
-        $rows = $this->_db->article()->where('name LIKE ?', $name);
+        $data = $this->findOne([
+                'where' => 'id = :id',
+            ], [':id' => $id]);
 
-        $data = $this->iterator2Array($rows, true);
-
-        return !empty($data) ? $data : [];
+        return $data;
     }
 
-    public function insert($data)
+    public function addNewArticle($data)
     {
-        $result = $this->_db->article()->insert($data);
+        $result = $this->insert($data);
 
         return $result;
     }
 
-    public function updateById($id, $data)
+    public function updateArticleById($id, $data)
     {
-        $result = $this->_db->article()->where('id = ?', $id)->update($data);
+        $result = $this->update([
+                'where' => 'id = :id',
+                'binds' => [':id' => $id],
+            ], $data);
 
-        if ($result === false) {
-            return false;
-        }
-
-        return true;
+        return $result;
     }
 
-    public function deleteById($id)
+    public function deleteArticleById($id)
     {
-        $result = $this->_db->article()->where('id = ?', $id)->delete();
+        $result = $this->delete('id = :id', [':id' => $id], $data);
 
-        if ($result === false) {
-            return false;
-        }
-
-        return true;
+        return $result;
     }
 }
 ?>

@@ -2,22 +2,26 @@
 // DIC configuration
 $container = $app->getContainer();
 
-// NotORM
+// Illuminate/database
 $container['db'] = function ($c) {
     $settings = $c->get('settings')['db'];
 
-    $dsn = sprintf('mysql:host=%s;port=%s;dbname=%s', $settings['host'], $settings['port'], $settings['database']);
+    $capsule = new \Illuminate\Database\Capsule\Manager;
 
-    $pdo = new PDO($dsn, $settings['username'], $settings['password']);
-    $pdo->exec(sprintf('set names %s', $settings['charset']));
+    $capsule->addConnection([
+        'driver'    => 'mysql',
+        'host'      => $settings['host'],
+        'database'  => $settings['database'],
+        'username'  => $settings['username'],
+        'password'  => $settings['password'],
+        'charset'   => $settings['charset'],
+        'collation' => $settings['collation'],
+        'prefix'    => $settings['prefix'],
+    ]);
 
-    $structure = new NotORM_Structure_Convention('id', '%s_id', '%s', $settings['prefix']);
+    $capsule->setAsGlobal();
 
-    $db = new NotORM($pdo, $structure);
-
-    // $db->debug = true;
-
-    return $db;
+    return $capsule;
 };
 
 // MongoDB
