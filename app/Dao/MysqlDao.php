@@ -16,14 +16,19 @@ class MysqlDao
     private $_table;
     private $_prefix;
 
-    // constructor receives container instance
-    public function __construct(ContainerInterface $di, $table)
+    /**
+     * constructor receives container instance
+     * @param ContainerInterface $di container instance
+     * @param string $table 表名称
+     * @param string $db 数据库配置名称，默认：db
+     */
+    public function __construct(ContainerInterface $di, $table, $db = 'db')
     {
         $this->_di = $di;
-        $this->_db = $di->get('db');
+        $this->_db = $di->get($db);
         $this->_table = $table;
 
-        $settings = $di->get('settings')['db'];
+        $settings = $di->get('settings')[$db];
         $this->_prefix = $settings['prefix'];
     }
 
@@ -67,7 +72,7 @@ class MysqlDao
 
     /**
      * 更新记录
-     * @param array $query WHERE语句，如：
+     * @param array $query 查询条件，如：
      *        [
      *            'where' => 'id = :id',
      *            'binds' => [':id' => 1],
@@ -93,7 +98,7 @@ class MysqlDao
 
     /**
      * 字段增量
-     * @param array $query WHERE语句，如：
+     * @param array $query 查询条件，如：
      *        [
      *            'where' => 'id = :id',
      *            'binds' => [':id' => 1],
@@ -125,7 +130,7 @@ class MysqlDao
 
     /**
      * 字段减量
-     * @param array $query WHERE语句，如：
+     * @param array $query 查询条件，如：
      *        [
      *            'where' => 'id = :id',
      *            'binds' => [':id' => 1],
@@ -159,17 +164,23 @@ class MysqlDao
      * 事务操作
      * @param array $actions 操作集合 (插入、更新和删除)，如：
      *        [
-     *            'insert' => [插入的数据，若是批量插入，则是二维数组],
-     *            'update' => [
-     *                'where' => 'status = :status',
-     *                'binds' => [':status' => 1],
-     *                'data' => ['status' => 0]',
+     *            'insert' => [
+     *                'table' => 'article',
+     *                'data'  => [插入的数据，若是批量插入，则是二维数组],
      *            ],
      *            'update' => [
+     *                'table' => 'user',
+     *                'where' => 'status = :status',
+     *                'binds' => [':status' => 1],
+     *                'data'  => ['status' => 0]',
+     *            ],
+     *            'delete' => [
+     *                'table' => 'user',
      *                'where' => 'status = :status',
      *                'binds' => [':status' => 1],
      *            ],
      *        ]
+     *        注：不传table字段，则操作当前表
      * @return bool 是否成功
      */
     protected function doTransaction($actions)
@@ -180,14 +191,17 @@ class MysqlDao
             foreach ($actions as $key => $action) {
                 switch ($key) {
                     case 'insert':
-                        $this->_db::table($this->_table)->insert($action);
+                        $table = !empty($action['table']) ? $action['table'] : $this->_table;
+                        $this->_db::table($table)->insert($action);
                         break;
                     case 'update':
-                        $sql = $this->_buildUpdate($action['where'], $action['binds'], $action['data']);
+                        $table = !empty($action['table']) ? $action['table'] : null;
+                        $sql = $this->_buildUpdate($action['where'], $action['binds'], $action['data'], $table);
                         $this->_db::update($sql, $action['binds']);
                         break;
                     case 'delete':
-                        $sql = $this->_buildDelete($action['where'], $action['binds']);
+                        $table = !empty($action['table']) ? $action['table'] : null;
+                        $sql = $this->_buildDelete($action['where'], $action['binds'], $table);
                         $this->_db::delete($sql, $action['binds']);
                         break;
                     default:
@@ -216,7 +230,7 @@ class MysqlDao
      *            'where'  => 'id = :id',
      *        ]
      * @param array $binds 查询语句中的绑定值，如：[':id' => 1]
-     * @return array        返回查询结果
+     * @return array 返回查询结果
      */
     protected function findOne($query, $binds = [])
     {
@@ -229,7 +243,9 @@ class MysqlDao
             return [];
         }
 
-        return $data;
+        $result = $this->_toArray($data);
+
+        return $result;
     }
 
     /**
@@ -245,20 +261,22 @@ class MysqlDao
      *        ]
      * 注：join条件是一个二维数组，可以进行多个JOIN操作
      * @param array $binds 查询语句中的绑定值，如：[':id' => [1, 2], ':status' => 1]
-     * @return array        返回查询结果
+     * @return array 返回查询结果
      */
     protected function find($query, $binds = [])
     {
         $sql = $this->_buildQuery($query, $binds);
         $data = $this->_db::select($sql, $binds);
 
-        return $data;
+        $result = $this->_toArray($data, true);
+
+        return $result;
     }
 
     /**
      * 查询所有记录
      * @param array $select 查询的字段
-     * @return array        返回查询结果
+     * @return array 返回查询结果
      */
     protected function findAll($select = ['*'])
     {
@@ -268,7 +286,30 @@ class MysqlDao
         $sql = sprintf("SELECT %s FROM %s", $fields, $table);
         $data = $this->_db::select($sql);
 
-        return $data;
+        $result = $this->_toArray($data, true);
+
+        return $result;
+    }
+
+    /**
+     * 获取记录数
+     * @param array $query 查询条件数组，如：
+     *        [
+     *            'where'  => 'id = :id',
+     *        ]
+     * @param array $binds 查询语句中的绑定值，如：[':id' => 1]
+     * @return int 返回记录数
+     */
+    protected function count($query = [], $binds = [], $column = '*')
+    {
+        if (empty($query['select'])) {
+            $query['select'] = [sprintf("COUNT(%s) AS count", $column)];
+        }
+
+        $sql = $this->_buildQuery($query, $binds);
+        $data = $this->_db::selectOne($sql, $binds);
+
+        return $data->count;
     }
 
     /**
@@ -293,7 +334,7 @@ class MysqlDao
     }
 
     // build update sql
-    private function _buildUpdate($where, &$binds, $data)
+    private function _buildUpdate($where, &$binds, $data, $table = null)
     {
         $updates = [];
 
@@ -302,9 +343,9 @@ class MysqlDao
         }
 
         $set = implode(', ', $updates);
-        $table = sprintf("%s%s", $this->_prefix, $this->_table);
+        $updateTable = !empty($table) ? sprintf("%s%s", $this->_prefix, $table) : sprintf("%s%s", $this->_prefix, $this->_table);
 
-        $sql = sprintf("UPDATE %s SET %s WHERE %s", $table, $set, $where);
+        $sql = sprintf("UPDATE %s SET %s WHERE %s", $updateTable, $set, $where);
 
         $this->_buildIn($sql, $binds);
 
@@ -326,7 +367,6 @@ class MysqlDao
         ];
 
         $separator = ' ';
-
         $sql = implode($separator, array_filter($clauses));
 
         $this->_buildIn($sql, $binds);
@@ -335,11 +375,11 @@ class MysqlDao
     }
 
     // build delete sql
-    private function _buildDelete($where, &$binds)
+    private function _buildDelete($where, &$binds, $table = null)
     {
-        $table = sprintf("%s%s", $this->_prefix, $this->_table);
+        $deleteTable = !empty($table) ? sprintf("%s%s", $this->_prefix, $table) : sprintf("%s%s", $this->_prefix, $this->_table);
 
-        $sql = sprintf("DELETE FROM %s WHERE %s", $table, $where);
+        $sql = sprintf("DELETE FROM %s WHERE %s", $deleteTable, $where);
 
         $this->_buildIn($sql, $binds);
 
@@ -449,6 +489,22 @@ class MysqlDao
         }
 
         return;
+    }
+
+    // convert stdClass to array
+    private function _toArray($data, $multiple = false)
+    {
+        $result = [];
+
+        if ($multiple) {
+            foreach ($data as $obj) {
+                $result[] = get_object_vars($obj);
+            }
+        } else {
+            $result = get_object_vars($data);
+        }
+
+        return $result;
     }
 }
 ?>

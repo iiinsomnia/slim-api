@@ -19,13 +19,18 @@ class MongoDao
     private $_sequence;
     private $_seqId;
 
-    // constructor receives container instance
-    public function __construct(ContainerInterface $di, $collection){
+    /**
+     * constructor receives container instance
+     * @param ContainerInterface $di container instance
+     * @param string $collection 集合名称
+     * @param string $db 数据库配置名称，默认：mongo
+     */
+    public function __construct(ContainerInterface $di, $collection, $db = 'mongo'){
         $this->_di = $di;
 
-        $mongo = $di->get('mongo');
+        $mongo = $di->get($db);
 
-        $settings = $di->get('settings')['mongo'];
+        $settings = $di->get('settings')[$db];
         $db = $settings['database'];
         $table = sprintf("%s%s", $settings['prefix'], $collection);
 
