@@ -50,8 +50,10 @@ class AuthMiddleware
         }
 
         // 验签
-        $query = $request->getUri()->getQuery();
-        $success = $this->validateSign($uuid[0], $accessTime[0], $accessSign[0], $query);
+        $path = $request->getUri()->getPath();
+        $query = $request->getQueryParams();
+
+        $success = $this->validateSign($uuid[0], $accessTime[0], $accessSign[0], $path, $query);
 
         if (!$success) {
             return $response->withJson([
@@ -105,17 +107,13 @@ class AuthMiddleware
         $authCache = new AuthCache($this->_di);
         $token = $authCache->getAuthToken($uuid);
 
-        $signString = '';
-        $route = str_replace('r=', '/', $query);
-        $parseUrl = parse_url($route);
+        array_shift($query);
+        $query['token'] = $token;
+        $query['timestamp'] = $accessTime;
 
-        if (empty($parseUrl['query'])) {
-            $signString = sprintf('%s?token=%s&timestamp=%s', $route, $token, $accessTime);
-        } else {
-            $signString = sprintf('%s&token=%s&timestamp=%s', $route, $token, $accessTime);
-        }
+        $signUrl = sprintf("%s?%s", $path, http_build_query($query));
 
-        if (strtolower($accessSign) != md5($signString)) {
+        if (strtolower($accessSign) != md5($signUrl)) {
             $this->code = -1;
             $this->msg = '验签失败';
 

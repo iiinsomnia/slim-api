@@ -22,8 +22,9 @@ class ArticleDao extends MysqlDao
     public function getArticleById($id)
     {
         $data = $this->findOne([
-                'where' => 'id = :id',
-            ], [':id' => $id]);
+                'where' => 'id = ?',
+                'binds' => [$id],
+            ]);
 
         return $data;
     }
@@ -38,8 +39,8 @@ class ArticleDao extends MysqlDao
     public function updateArticleById($id, $data)
     {
         $result = $this->update([
-                'where' => 'id = :id',
-                'binds' => [':id' => $id],
+                'where' => 'id = ?',
+                'binds' => [$id],
             ], $data);
 
         return $result;
@@ -47,7 +48,10 @@ class ArticleDao extends MysqlDao
 
     public function deleteArticleById($id)
     {
-        $result = $this->delete('id = :id', [':id' => $id], $data);
+        $result = $this->delete([
+                'where' => 'id = ?',
+                'binds' => [$id],
+            ]);
 
         return $result;
     }

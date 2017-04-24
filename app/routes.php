@@ -7,8 +7,8 @@ $app->get('/', function ($request, $response, $args) {
     ], 200);
 });
 
-$app->post('/login', '\App\Controllers\AuthController:actionLogin')->add(\App\Middlewares\HeaderMiddleware::class);
-$app->get('/logout', '\App\Controllers\AuthController:actionLogout')->add(\App\Middlewares\HeaderMiddleware::class);
+$app->post('/login', '\App\Controllers\AuthController:actionLogin')->add(\App\Middlewares\UUIDMiddleware::class);
+$app->get('/logout', '\App\Controllers\AuthController:actionLogout')->add(\App\Middlewares\UUIDMiddleware::class);
 
 $app->group('/v1', function () {
     $this->get('/userinfo', '\App\Controllers\V1\UserController:actionView');

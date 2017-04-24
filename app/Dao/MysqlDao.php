@@ -75,17 +75,17 @@ class MysqlDao
      * @param array $query 查询条件，如：
      *        [
      *            'where' => 'id = :id',
-     *            'binds' => [':id' => 1],
+     *            'binds' => [1],
      *        ]
      * @param array $data 更新的数据
      * @return int/false 更新影响的行数
      */
     protected function update($query, $data)
     {
-        $sql = $this->_buildUpdate($query['where'], $query['binds'], $data);
+        $build = $this->_buildUpdate($query, $data);
 
         try {
-            $affectRows = $this->_db::update($sql, $query['binds']);
+            $affectRows = $this->_db::update($build['sql'], $build['binds']);
 
             return $affectRows;
         } catch (QueryException $e) {
@@ -97,64 +97,105 @@ class MysqlDao
     }
 
     /**
-     * 字段增量
-     * @param array $query 查询条件，如：
+     * 获取记录数
+     * @param array $query 查询条件数组，如：
      *        [
-     *            'where' => 'id = :id',
-     *            'binds' => [':id' => 1],
+     *            'where' => 'id = ?',
+     *            'bind'  => [1],
      *        ]
-     * @param string $data 增量的字段
-     * @param int $inc 增量的值，默认：1
-     * @return int/false 更新影响的行数
+     * @param string $column 聚合字段，默认：*
+     * @return int 返回记录数
      */
-    protected function increment($query, $column, $inc = 1)
+    protected function count($query = [], $column = '*')
     {
-        $set = sprintf("%s = %s + %d", $column, $column, $inc);
-        $table = sprintf("%s%s", $this->_prefix, $this->_table);
+        $query['select'] = sprintf("COUNT(%s) AS count", $column);
 
-        $sql = sprintf("UPDATE %s SET %s WHERE %s", $table, $set, $query['where']);
+        $build = $this->_buildQuery($query);
+        $data = $this->_db::selectOne($build['sql'], $build['binds']);
 
-        $this->_buildIn($sql, $query['binds']);
-
-        try {
-            $affectRows = $this->_db::update($sql, $query['binds']);
-
-            return $affectRows;
-        } catch (QueryException $e) {
-            $logger = $this->_di->get('logger');
-            $logger->error(sprintf("[MySQL] Increment Error: %s", $e->getMessage()));
-
-            return false;
-        }
+        return $data->count;
     }
 
     /**
-     * 字段减量
-     * @param array $query 查询条件，如：
+     * 查询单条记录
+     * @param array $query 查询条件数组，如：
      *        [
-     *            'where' => 'id = :id',
-     *            'binds' => [':id' => 1],
+     *            'select' => 'id, name',
+     *            'where'  => 'id = ?',
+     *            'binds'  => [1],
      *        ]
-     * @param string $data 减量的字段
-     * @param int $dec 减量的值，默认：1
+     * @return array 返回查询结果
+     */
+    protected function findOne($query)
+    {
+        $query['limit'] = 1;
+
+        $build = $this->_buildQuery($query);
+        $data = $this->_db::selectOne($build['sql'], $build['binds']);
+
+        $result = $this->_toArray($data);
+
+        return $result;
+    }
+
+    /**
+     * 查询多条记录
+     * @param array $query 查询条件数组，如：
+     *        [
+     *            'select' => 'a.id, a.name, b.name AS username',
+     *            'join'   => ['LEFT JOIN slim_user AS b ON a.uid = b.id'],
+     *            'where'  => 'a.id IN (?) AND a.status = ?,
+     *            'order'  => 'a.id DESC',
+     *            'offset' => 0,
+     *            'limit'  => 10,
+     *            'binds'  => [[1, 2], 1],
+     *        ]
+     * 注：join条件是一个数组，可以进行多个JOIN操作
+     * @return array 返回查询结果
+     */
+    protected function find($query)
+    {
+        $build = $this->_buildQuery($query);
+        $data = $this->_db::select($build['sql'], $build['binds']);
+
+        $result = $this->_toArray($data, true);
+
+        return $result;
+    }
+
+    /**
+     * 查询所有记录
+     * @param array $columns 查询的字段
+     * @return array 返回查询结果
+     */
+    protected function findAll($columns = ['*'])
+    {
+        $select = implode(',', $columns);
+
+        $sql = sprintf("SELECT %s FROM %s%s", $select, $this->_prefix, $this->_table);
+        $data = $this->_db::select($sql);
+
+        $result = $this->_toArray($data, true);
+
+        return $result;
+    }
+
+    /**
+     * 删除记录
+     * @param string $where WHERE语句，如：'id = :id'
+     * @param array $binds WHERE语句中的绑定值，如：[':id' => 1]
      * @return int/false 更新影响的行数
      */
-    protected function decrement($query, $column, $dec = 1)
+    protected function delete($query)
     {
-        $set = sprintf("%s = %s - %d", $column, $column, $dec);
-        $table = sprintf("%s%s", $this->_prefix, $this->_table);
-
-        $sql = sprintf("UPDATE %s SET %s WHERE %s", $table, $set, $query['where']);
-
-        $this->_buildIn($sql, $query['binds']);
-
         try {
-            $affectRows = $this->_db::update($sql, $query['binds']);
+            $sql = $this->_buildDelete($where, $binds);
+            $affectRows = $this->_db::delete($sql, $binds);
 
             return $affectRows;
         } catch (QueryException $e) {
             $logger = $this->_di->get('logger');
-            $logger->error(sprintf("[MySQL] Decrement Error: %s", $e->getMessage()));
+            $logger->error(sprintf("BatchInsert Error: %s", $e->getMessage()));
 
             return false;
         }
@@ -162,49 +203,47 @@ class MysqlDao
 
     /**
      * 事务操作
-     * @param array $actions 操作集合 (插入、更新和删除)，如：
+     * @param array $operations 操作集合 (插入、更新和删除)，如：
      *        [
      *            'insert' => [
      *                'table' => 'article',
      *                'data'  => [插入的数据，若是批量插入，则是二维数组],
      *            ],
      *            'update' => [
-     *                'table' => 'user',
-     *                'where' => 'status = :status',
-     *                'binds' => [':status' => 1],
+     *                'query' => [
+     *                    'table' => 'user',
+     *                    'where' => 'status = ?',
+     *                    'binds' => [1],
+     *                ]
      *                'data'  => ['status' => 0]',
      *            ],
      *            'delete' => [
      *                'table' => 'user',
      *                'where' => 'status = :status',
-     *                'binds' => [':status' => 1],
+     *                'binds' => [1],
      *            ],
      *        ]
      *        注：不传table字段，则操作当前表
      * @return bool 是否成功
      */
-    protected function doTransaction($actions)
+    protected function doTransaction($operations)
     {
         $this->_db::beginTransaction();
 
         try {
-            foreach ($actions as $key => $action) {
-                switch ($key) {
+            foreach ($operations as $k => $v) {
+                switch ($k) {
                     case 'insert':
-                        $table = !empty($action['table']) ? $action['table'] : $this->_table;
+                        $table = !empty($v['table']) ? $v['table'] : $this->_table;
                         $this->_db::table($table)->insert($action);
                         break;
                     case 'update':
-                        $table = !empty($action['table']) ? $action['table'] : null;
-                        $sql = $this->_buildUpdate($action['where'], $action['binds'], $action['data'], $table);
-                        $this->_db::update($sql, $action['binds']);
+                        $build = $this->_buildUpdate($v['query'], $v['data']);
+                        $this->_db::update($build['sql'], $build['binds']);
                         break;
                     case 'delete':
-                        $table = !empty($action['table']) ? $action['table'] : null;
-                        $sql = $this->_buildDelete($action['where'], $action['binds'], $table);
-                        $this->_db::delete($sql, $action['binds']);
-                        break;
-                    default:
+                        $build = $this->_buildDelete(v);
+                        $this->_db::delete($build['sql'], $v['binds']);
                         break;
                 }
             }
@@ -222,269 +261,161 @@ class MysqlDao
         }
     }
 
-    /**
-     * 查询单条记录
-     * @param array $query 查询条件数组，如：
-     *        [
-     *            'select' => ['id', 'name'],
-     *            'where'  => 'id = :id',
-     *        ]
-     * @param array $binds 查询语句中的绑定值，如：[':id' => 1]
-     * @return array 返回查询结果
-     */
-    protected function findOne($query, $binds = [])
+    // build update
+    private function _buildUpdate($query, $data)
     {
-        $query['limit'] = 1;
+        $table = $this->_table;
+        $sets = [];
+        $clauses = [];
+        $binds = [];
 
-        $sql = $this->_buildQuery($query, $binds);
-        $data = $this->_db::selectOne($sql, $binds);
-
-        if (empty($data)) {
-            return [];
+        if (!empty($query['table'])) {
+            $table = $query['table'];
         }
 
-        $result = $this->_toArray($data);
+        $clauses[] = sprintf("UPDATE %s%s", $this->_prefix, $table);
 
-        return $result;
-    }
-
-    /**
-     * 查询多条记录
-     * @param array $query 查询条件数组，如：
-     *        [
-     *            'select' => ['article.id', 'article.name', 'user.name AS username'],
-     *            'join'   => [['LEFT JOIN', 'user', 'article.uid = user.id']],
-     *            'where'  => 'article.id IN (:id) AND article.status =: status,
-     *            'order'  => 'article.id DESC',
-     *            'offset' => 0,
-     *            'limit'  => 10,
-     *        ]
-     * 注：join条件是一个二维数组，可以进行多个JOIN操作
-     * @param array $binds 查询语句中的绑定值，如：[':id' => [1, 2], ':status' => 1]
-     * @return array 返回查询结果
-     */
-    protected function find($query, $binds = [])
-    {
-        $sql = $this->_buildQuery($query, $binds);
-        $data = $this->_db::select($sql, $binds);
-
-        $result = $this->_toArray($data, true);
-
-        return $result;
-    }
-
-    /**
-     * 查询所有记录
-     * @param array $select 查询的字段
-     * @return array 返回查询结果
-     */
-    protected function findAll($select = ['*'])
-    {
-        $fields = implode(',', $select);
-        $table = sprintf("%s%s", $this->_prefix, $this->_table);
-
-        $sql = sprintf("SELECT %s FROM %s", $fields, $table);
-        $data = $this->_db::select($sql);
-
-        $result = $this->_toArray($data, true);
-
-        return $result;
-    }
-
-    /**
-     * 获取记录数
-     * @param array $query 查询条件数组，如：
-     *        [
-     *            'where'  => 'id = :id',
-     *        ]
-     * @param array $binds 查询语句中的绑定值，如：[':id' => 1]
-     * @return int 返回记录数
-     */
-    protected function count($query = [], $binds = [], $column = '*')
-    {
-        if (empty($query['select'])) {
-            $query['select'] = [sprintf("COUNT(%s) AS count", $column)];
+        foreach ($data as $k => $v) {
+            $sets[] = sprintf("%s = ?", $k);
+            $binds[] = $v;
         }
 
-        $sql = $this->_buildQuery($query, $binds);
-        $data = $this->_db::selectOne($sql, $binds);
+        $clauses[] = sprintf("SET %s", implode(', ', $sets));
 
-        return $data->count;
-    }
-
-    /**
-     * 删除记录
-     * @param string $where WHERE语句，如：'id = :id'
-     * @param array $binds WHERE语句中的绑定值，如：[':id' => 1]
-     * @return int/false 更新影响的行数
-     */
-    protected function delete($where, $binds)
-    {
-        try {
-            $sql = $this->_buildDelete($where, $binds);
-            $affectRows = $this->_db::delete($sql, $binds);
-
-            return $affectRows;
-        } catch (QueryException $e) {
-            $logger = $this->_di->get('logger');
-            $logger->error(sprintf("BatchInsert Error: %s", $e->getMessage()));
-
-            return false;
-        }
-    }
-
-    // build update sql
-    private function _buildUpdate($where, &$binds, $data, $table = null)
-    {
-        $updates = [];
-
-        foreach ($data as $key => $value) {
-            $updates[] = sprintf("%s = %s", $key, $value);
+        if (!empty($query['where'])) {
+            $clauses[] = sprintf("WHERE %s", $query['where']);
         }
 
-        $set = implode(', ', $updates);
-        $updateTable = !empty($table) ? sprintf("%s%s", $this->_prefix, $table) : sprintf("%s%s", $this->_prefix, $this->_table);
+        if (!empty($query['binds'])) {
+            $binds = array_merge_recursive($binds, $query['binds']);;
+        }
 
-        $sql = sprintf("UPDATE %s SET %s WHERE %s", $updateTable, $set, $where);
+        $separator = ' ';
+        $sql = implode($separator, $clauses);
 
         $this->_buildIn($sql, $binds);
 
-        return $sql;
-    }
-
-    // bulid query sql
-    private function _buildQuery($query, &$binds)
-    {
-        $clauses = [
-            $this->_buildSelect($query),
-            $this->_buildFrom(),
-            $this->_buildJoin($query),
-            $this->_buildWhere($query),
-            $this->_buildGroupBy($query),
-            $this->_buildOrder($query),
-            $this->_buildOffset($query),
-            $this->_buildLimit($query),
+        return [
+            'sql'   => $sql,
+            'binds' => $binds,
         ];
-
-        $separator = ' ';
-        $sql = implode($separator, array_filter($clauses));
-
-        $this->_buildIn($sql, $binds);
-
-        return $sql;
     }
 
-    // build delete sql
-    private function _buildDelete($where, &$binds, $table = null)
+    // bulid query
+    private function _buildQuery($query)
     {
-        $deleteTable = !empty($table) ? sprintf("%s%s", $this->_prefix, $table) : sprintf("%s%s", $this->_prefix, $this->_table);
+        $table = $this->_table;
+        $clauses = [];
+        $binds = [];
 
-        $sql = sprintf("DELETE FROM %s WHERE %s", $deleteTable, $where);
-
-        $this->_buildIn($sql, $binds);
-
-        return $sql;
-    }
-
-    // build select
-    private function _buildSelect($query)
-    {
-        if (empty($query['select'])) {
-            return 'SELECT *';
+        if (!empty($query['select'])) {
+            $clauses[] = sprintf("SELECT %s", $query['select']);
+        } else {
+            $clauses[] = "SELECT *";
         }
 
-        $fields = implode(',', $query['select']);
-
-        return sprintf("SELECT %s", $fields);
-    }
-
-    // build from
-    private function _buildFrom()
-    {
-        $table = sprintf("%s%s", $this->_prefix, $this->_table);
-
-        return sprintf("FROM %s", $table);
-    }
-
-    // build join
-    private function _buildJoin($query)
-    {
-        if (empty($query['join'])) {
-            return '';
+        if (!empty($query['table'])) {
+            $table = $query['table'];
         }
 
-        $joins = [];
+        if (!empty($query['join'])) {
+            $clauses[] = sprintf("FROM %s%s AS a", $this->_prefix, $table);
 
-        foreach ($query['join'] as $val) {
-            $table = sprintf("%s%s", $this->_prefix, $val[1]);
-            $join = sprintf("%s %s ON %s", $val[0], $table, $val[2]);
-            $joins[] = $join;
+            foreach ($query['join'] as $v) {
+                $clauses[] = $v;
+            }
+        } else {
+            $clauses[] = sprintf("FROM %s%s", $this->_prefix, $table);
+        }
+
+        if (!empty($query['where'])) {
+            $clauses[] = sprintf("WHERE %s", $query['where']);
+        }
+
+        if (!empty($query['group'])) {
+            $clauses[] = sprintf("GROUP BY %s", $query['group']);
+        }
+
+        if (!empty($query['order'])) {
+            $clauses[] = sprintf("ORDER BY %s", $query['order']);
+        }
+
+        if (!empty($query['offset'])) {
+            $clauses[] = sprintf("OFFSET %s", $query['offset']);
+        }
+
+        if (!empty($query['limit'])) {
+            $clauses[] = sprintf("LIMIT %s", $query['limit']);
+        }
+
+        if (!empty($query['binds'])) {
+            $binds = $query['binds'];
         }
 
         $separator = ' ';
+        $sql = implode($separator, $clauses);
 
-        return implode($separator, $joins);
+        $this->_buildIn($sql, $binds);
+
+        return [
+            'sql'   => $sql,
+            'binds' => $binds,
+        ];
     }
 
-    // build where
-    private function _buildWhere($query)
+    // build delete
+    private function _buildDelete($query)
     {
-        if (empty($query['where'])) {
-            return '';
+        $table = $this->_table;
+        $clauses = [];
+        $binds = [];
+
+        if (!empty($query['table'])) {
+            $table = $query['table'];
         }
 
-        return sprintf("WHERE %s", $query['where']);
-    }
+        $clauses[] = sprintf("DELETE FROM %s%s", $this->_prefix, $table);
 
-    // build groupby
-    private function _buildGroupBy($query)
-    {
-        if (empty($query['group'])) {
-            return '';
+        if (!empty($query['where'])) {
+            $clauses[] = sprintf("WHERE %s", $query['where']);
         }
 
-        return sprintf("GROUP BY %s", $query['group']);
-    }
-
-    // build orderby
-    private function _buildOrder($query)
-    {
-        if (empty($query['order'])) {
-            return '';
+        if (!empty($query['binds'])) {
+            $binds = $query['binds'];
         }
 
-        return sprintf("ORDER BY %s", $query['order']);
-    }
+        $separator = ' ';
+        $sql = implode($separator, $clauses);
 
-    // build offset
-    private function _buildOffset($query)
-    {
-        if (empty($query['offset'])) {
-            return '';
-        }
+        $this->_buildIn($sql, $binds);
 
-        return sprintf("OFFSET %s", $query['offset']);
-    }
-
-    // build limit
-    private function _buildLimit($query)
-    {
-        if (empty($query['limit'])) {
-            return '';
-        }
-
-        return sprintf("LIMIT %s", $query['limit']);
+        return [
+            'sql'   => $sql,
+            'binds' => $binds,
+        ];
     }
 
     // build in
     private function _buildIn(&$sql, &$binds)
     {
-        foreach ($binds as $key => &$value) {
-            if (is_array($value)) {
-                $in = implode(',', $value);
-                $sql = str_replace($key, $in, $sql);
+        if (empty($binds)) {
+            return;
+        }
 
-                unset($binds[$key]);
+        foreach ($binds as $k => $v) {
+            if (is_array($v)) {
+                $placeholders = [];
+
+                for ($i = 0; $i < count($v); $i++) {
+                    $placeholders[] = '?';
+                }
+
+                $bindvar = sprintf("(%s)", implode(', ', $placeholders));
+                $sql = preg_replace('/\(\?\)/', $bindvar, $sql);
+
+                array_splice($binds, $k, 1, $v);
+
+                break;
             }
         }
 
@@ -494,6 +425,10 @@ class MysqlDao
     // convert stdClass to array
     private function _toArray($data, $multiple = false)
     {
+        if (empty($data)) {
+            return [];
+        }
+
         $result = [];
 
         if ($multiple) {

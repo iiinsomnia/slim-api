@@ -1,7 +1,7 @@
 <?php
 namespace App\Middlewares;
 
-class HeaderMiddleware
+class UUIDMiddleware
 {
     /**
      * Example middleware invokable class
