@@ -1,10 +1,10 @@
 <?php
 namespace App\Dao\Mongo;
 
-use App\Dao\MongoDao;
+use App\Dao\Mongo;
 use Psr\Container\ContainerInterface;
 
-class BookDao extends MongoDao
+class BookDao extends Mongo
 {
     // constructor receives container instance
     public function __construct(ContainerInterface $di){

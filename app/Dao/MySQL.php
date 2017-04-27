@@ -9,7 +9,7 @@ use Psr\Container\ContainerInterface;
  * 如有需要，请自行扩展
  * 文档参考Laravel查询构造器
  */
-class MysqlDao
+class MySQL
 {
     private $_di;
     private $_db;
@@ -205,11 +205,13 @@ class MysqlDao
      * 事务操作
      * @param array $operations 操作集合 (插入、更新和删除)，如：
      *        [
-     *            'insert' => [
+     *            [
+     *                'type'  => 'insert',
      *                'table' => 'article',
      *                'data'  => [插入的数据，若是批量插入，则是二维数组],
      *            ],
-     *            'update' => [
+     *            [
+     *                'type'  => 'update',
      *                'query' => [
      *                    'table' => 'user',
      *                    'where' => 'status = ?',
@@ -217,10 +219,13 @@ class MysqlDao
      *                ]
      *                'data'  => ['status' => 0]',
      *            ],
-     *            'delete' => [
-     *                'table' => 'user',
-     *                'where' => 'status = :status',
-     *                'binds' => [1],
+     *            [
+     *                'type'  => 'delete',
+     *                'query' => [
+     *                    'table' => 'user',
+     *                    'where' => 'status = ?',
+     *                    'binds' => [1],
+     *                ],
      *            ],
      *        ]
      *        注：不传table字段，则操作当前表
@@ -231,8 +236,8 @@ class MysqlDao
         $this->_db::beginTransaction();
 
         try {
-            foreach ($operations as $k => $v) {
-                switch ($k) {
+            foreach ($operations as $v) {
+                switch ($v['type']) {
                     case 'insert':
                         $table = !empty($v['table']) ? $v['table'] : $this->_table;
                         $this->_db::table($table)->insert($action);
@@ -242,7 +247,7 @@ class MysqlDao
                         $this->_db::update($build['sql'], $build['binds']);
                         break;
                     case 'delete':
-                        $build = $this->_buildDelete(v);
+                        $build = $this->_buildDelete($v['query']);
                         $this->_db::delete($build['sql'], $v['binds']);
                         break;
                 }

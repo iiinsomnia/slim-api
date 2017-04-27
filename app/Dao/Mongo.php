@@ -12,7 +12,7 @@ use Psr\Container\ContainerInterface;
  * 如有需要，请自行扩展
  * 文档地址：https://docs.mongodb.com/php-library/master/tutorial/install-php-library/
  */
-class MongoDao
+class Mongo
 {
     private $_di;
     private $_collection;

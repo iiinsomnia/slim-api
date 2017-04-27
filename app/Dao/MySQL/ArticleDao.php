@@ -1,10 +1,10 @@
 <?php
 namespace App\Dao\MySQL;
 
-use App\Dao\MysqlDao;
+use App\Dao\MySQL;
 use Psr\Container\ContainerInterface;
 
-class ArticleDao extends MysqlDao
+class ArticleDao extends MySQL
 {
     // constructor receives container instance
     public function __construct(ContainerInterface $di)
