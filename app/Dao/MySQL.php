@@ -74,7 +74,7 @@ class MySQL
      * 更新记录
      * @param array $query 查询条件，如：
      *        [
-     *            'where' => 'id = :id',
+     *            'where' => 'id = ?',
      *            'binds' => [1],
      *        ]
      * @param array $data 更新的数据
@@ -182,15 +182,18 @@ class MySQL
 
     /**
      * 删除记录
-     * @param string $where WHERE语句，如：'id = :id'
-     * @param array $binds WHERE语句中的绑定值，如：[':id' => 1]
+     * @param array $query 查询条件，如：
+     *        [
+     *            'where' => 'id = ?',
+     *            'binds' => [1],
+     *        ]
      * @return int/false 更新影响的行数
      */
     protected function delete($query)
     {
         try {
-            $sql = $this->_buildDelete($where, $binds);
-            $affectRows = $this->_db::delete($sql, $binds);
+            $build = $this->_buildDelete($query);
+            $affectRows = $this->_db::delete($build['sql'], $build['binds']);
 
             return $affectRows;
         } catch (QueryException $e) {
@@ -240,7 +243,7 @@ class MySQL
                 switch ($v['type']) {
                     case 'insert':
                         $table = !empty($v['table']) ? $v['table'] : $this->_table;
-                        $this->_db::table($table)->insert($action);
+                        $this->_db::table($table)->insert($v['data']);
                         break;
                     case 'update':
                         $build = $this->_buildUpdate($v['query'], $v['data']);
@@ -248,7 +251,7 @@ class MySQL
                         break;
                     case 'delete':
                         $build = $this->_buildDelete($v['query']);
-                        $this->_db::delete($build['sql'], $v['binds']);
+                        $this->_db::delete($build['sql'], $build['binds']);
                         break;
                 }
             }
