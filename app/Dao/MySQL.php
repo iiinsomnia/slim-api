@@ -348,12 +348,12 @@ class MySQL
             $clauses[] = sprintf("ORDER BY %s", $query['order']);
         }
 
-        if (!empty($query['offset'])) {
-            $clauses[] = sprintf("OFFSET %s", $query['offset']);
-        }
-
         if (!empty($query['limit'])) {
             $clauses[] = sprintf("LIMIT %s", $query['limit']);
+        }
+
+        if (!empty($query['offset'])) {
+            $clauses[] = sprintf("OFFSET %s", $query['offset']);
         }
 
         if (!empty($query['binds'])) {
