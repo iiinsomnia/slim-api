@@ -7,7 +7,7 @@ return [
         'displayErrorDetails'    => env('APP_DEBUG', true), // set to false in production
         'addContentLengthHeader' => false, // Allow the web server to send the content-length header
 
-        // NotORM settings
+        // db settings
         'db' => [
             'host'      => env('DB_HOST', '127.0.0.1'),
             'port'      => env('DB_PORT', '3306'),
@@ -40,8 +40,8 @@ return [
 
         // Monolog settings
         'logger' => [
-            'name'  => 'slim-app',
-            'path'  => __DIR__ . '/../logs/'.date('Y-m-d').'.log',
+            'name'  => 'Monlog',
+            'path'  => env('LOG_PATH', __DIR__ . '/../logs/').date('Y-m-d').'.log',
             'level' => \Monolog\Logger::DEBUG,
         ],
     ],

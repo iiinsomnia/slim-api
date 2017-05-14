@@ -59,9 +59,42 @@ $container['logger'] = function ($c) {
     $settings = $c->get('settings')['logger'];
 
     $logger = new Monolog\Logger($settings['name']);
-    $file_handler = new Monolog\Handler\StreamHandler($settings['path'], $settings['level']);
-    $logger->pushHandler($file_handler);
+    $logger->pushHandler(new Monolog\Handler\StreamHandler($settings['path'], $settings['level']));
 
     return $logger;
 };
+
+if (!env('APP_DEBUG', true)) {
+    // ErrorHandler
+    $container['errorHandler'] = function ($c) {
+        return function ($request, $response, $error) use ($c) {
+            $c['logger']->error(null, [
+                    'message' => $error->getMessage(),
+                    'file'    => $error->getFile(),
+                    'line'    => $error->getLine(),
+                ]);
+
+            return $response->withJson([
+                'code' => -1,
+                'msg' => 'server internal error',
+            ], 200);
+        };
+    };
+
+    // PHPErrorHandler
+    $container['phpErrorHandler'] = function ($c) {
+        return function ($request, $response, $error) use ($c) {
+            $c['logger']->error(null, [
+                    'message' => $error->getMessage(),
+                    'file'    => $error->getFile(),
+                    'line'    => $error->getLine(),
+                ]);
+
+            return $response->withJson([
+                'code' => -1,
+                'msg' => 'server internal error',
+            ], 200);
+        };
+    };
+}
 ?>
