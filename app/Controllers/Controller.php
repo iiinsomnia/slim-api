@@ -1,16 +1,22 @@
 <?php
 namespace App\Controllers;
 
-class BaseController
+use Psr\Container\ContainerInterface;
+
+class Controller
 {
     protected $code;
     protected $msg;
     protected $data;
 
-    function __construct() {
+    protected $container;
+
+    function __construct(ContainerInterface $c) {
         $this->code = 0;
         $this->msg = 'success';
         $this->data = false;
+
+        $this->container = $c;
     }
 
     public function json($response) {

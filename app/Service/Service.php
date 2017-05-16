@@ -4,18 +4,18 @@ namespace App\Service;
 use App\Cache\AuthCache;
 use Psr\Container\ContainerInterface;
 
-class IIInsomnia
+class Service
 {
-    private $_di;
+    protected $container;
 
-    function __construct(ContainerInterface $di)
+    function __construct(ContainerInterface $c)
     {
-        $this->_di = $di;
+        $this->container = $c;
     }
 
     protected function getUserId($uuid)
     {
-        $authCache = new AuthCache($this->_di);
+        $authCache = new AuthCache($this->container);
         $loginInfo = $authCache->getAuthCache($uuid);
 
         if (empty($loginInfo)) {
@@ -27,7 +27,7 @@ class IIInsomnia
 
     protected function getUserInfo($uuid)
     {
-        $authCache = new AuthCache($this->_di);
+        $authCache = new AuthCache($this->container);
         $loginInfo = $authCache->getAuthCache($uuid);
 
         if (empty($loginInfo)) {

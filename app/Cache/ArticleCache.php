@@ -9,17 +9,17 @@ class ArticleCache
 
     private $_cacheKey = 'article';
 
-    function __construct(ContainerInterface $di)
+    function __construct(ContainerInterface $c)
     {
-        $this->_redis = $di->get('redis');
+        $this->_redis = $c->get('redis');
     }
 
-    public function setArticleCache($articleId, $data)
+    public function setCacheById($articleId, $data)
     {
         $this->_redis->hset($this->_cacheKey, $articleId, json_encode($data));
     }
 
-    public function getArticleCache($articleId)
+    public function getCacheById($articleId)
     {
         $data = $this->_redis->hget($this->_cacheKey, $articleId);
 
@@ -30,7 +30,7 @@ class ArticleCache
         return json_decode($data, true);
     }
 
-    public function delArticleCache($articleId)
+    public function delCacheById($articleId)
     {
         $this->_redis->hdel($this->_cacheKey, $articleId);
     }

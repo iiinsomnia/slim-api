@@ -11,10 +11,11 @@ use Psr\Container\ContainerInterface;
  */
 class MySQL
 {
-    private $_di;
     private $_db;
     private $_table;
     private $_prefix;
+
+    protected $container;
 
     /**
      * constructor receives container instance
@@ -22,14 +23,15 @@ class MySQL
      * @param string $table 表名称
      * @param string $db 数据库配置名称，默认：db
      */
-    public function __construct(ContainerInterface $di, $table, $db = 'db')
+    public function __construct(ContainerInterface $c, $table, $db = 'db')
     {
-        $this->_di = $di;
-        $this->_db = $di->get($db);
+        $this->_db = $c->get($db);
         $this->_table = $table;
 
-        $settings = $di->get('settings')[$db];
+        $settings = $c->get('settings')[$db];
         $this->_prefix = $settings['prefix'];
+
+        $this->container = $c;
     }
 
     /**
@@ -44,7 +46,7 @@ class MySQL
 
             return $id;
         } catch (QueryException $e) {
-            $logger = $this->_di->get('logger');
+            $logger = $this->container->get('logger');
             $logger->error(sprintf("[MySQL] Insert Error: %s", $e->getMessage()));
 
             return false;
@@ -63,7 +65,7 @@ class MySQL
 
             return $success;
         } catch (QueryException $e) {
-            $logger = $this->_di->get('logger');
+            $logger = $this->container->get('logger');
             $logger->error(sprintf("[MySQL] BatchInsert Error: %s", $e->getMessage()));
 
             return false;
@@ -89,7 +91,7 @@ class MySQL
 
             return $affectRows;
         } catch (QueryException $e) {
-            $logger = $this->_di->get('logger');
+            $logger = $this->container->get('logger');
             $logger->error(sprintf("[MySQL] Update Error: %s", $e->getMessage()));
 
             return false;
@@ -197,7 +199,7 @@ class MySQL
 
             return $affectRows;
         } catch (QueryException $e) {
-            $logger = $this->_di->get('logger');
+            $logger = $this->container->get('logger');
             $logger->error(sprintf("BatchInsert Error: %s", $e->getMessage()));
 
             return false;
@@ -262,7 +264,7 @@ class MySQL
         } catch (QueryException $e) {
             $this->_db::rollback();
 
-            $logger = $this->_di->get('logger');
+            $logger = $this->container->get('logger');
             $logger->error(sprintf("[MySQL] DoTransaction Error: %s", $e->getMessage()));
 
             return false;

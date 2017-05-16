@@ -1,26 +1,22 @@
 <?php
 namespace App\Controllers\V1;
 
-use App\Controllers\BaseController;
-use App\Service\Book;
+use App\Controllers\Controller;
+use App\Service\V1\Book;
 use Psr\Container\ContainerInterface;
 
-class BookController extends BaseController
+class BookController extends Controller
 {
-    private $_di;
-
     // constructor receives container instance
-    function __construct(ContainerInterface $di)
+    function __construct(ContainerInterface $c)
     {
-        parent::__construct();
-
-        $this->_di = $di;
+        parent::__construct($c);
     }
 
     public function actionList($request, $response, $args)
     {
         // $query = $request->getQueryParams();
-        $book = new Book($this->_di);
+        $book = new Book($this->container);
         $book->handleActionList($this->code, $this->msg, $this->data);
 
         return $this->json($response);
@@ -28,7 +24,7 @@ class BookController extends BaseController
 
     public function actionDetail($request, $response, $args)
     {
-        $book = new Book($this->_di);
+        $book = new Book($this->container);
         $book->handleActionDetail($args['id'], $this->code, $this->msg, $this->data);
 
         return $this->json($response);
@@ -38,7 +34,7 @@ class BookController extends BaseController
     {
         $postData = $request->getParsedBody();
 
-        $book = new Book($this->_di);
+        $book = new Book($this->container);
         $book->handleActionAdd($postData, $this->code, $this->msg, $this->data);
 
         return $this->json($response);
@@ -48,7 +44,7 @@ class BookController extends BaseController
     {
         $putData = $request->getParsedBody();
 
-        $book = new Book($this->_di);
+        $book = new Book($this->container);
         $book->handleActionUpdate($args['id'], $putData, $this->code, $this->msg);
 
         return $this->json($response);
@@ -56,7 +52,7 @@ class BookController extends BaseController
 
     public function actionDelete($request, $response, $args)
     {
-        $book = new Book($this->_di);
+        $book = new Book($this->container);
         $book->handleActionDelete($args['id'], $this->code, $this->msg);
 
         return $this->json($response);

@@ -7,25 +7,25 @@ use Psr\Container\ContainerInterface;
 class BookDao extends Mongo
 {
     // constructor receives container instance
-    public function __construct(ContainerInterface $di){
-        parent::__construct($di, 'book');
+    function __construct(ContainerInterface $c){
+        parent::__construct($c, 'book');
     }
 
-    public function getAllBooks()
+    public function getAll()
     {
         $data = $this->findAll();
 
         return $data;
     }
 
-    public function getBookById($id)
+    public function getById($id)
     {
         $data = $this->findOne(['_id' => intval($id)]);
 
         return $data;
     }
 
-    public function getBooksByTitle($title)
+    public function getByTitle($title)
     {
         $regex = new \MongoDB\BSON\Regex(sprintf(".*%s.*", $title));
         $data = $this->find(['title' => $regex]);
@@ -33,23 +33,21 @@ class BookDao extends Mongo
         return $data;
     }
 
-    public function addNewBook($data)
+    public function addNew($data)
     {
-        $result = [$data, $data, $data];
-
-        $result = $this->batchInsert($result);
+        $result = $this->insert($data);
 
         return $result;
     }
 
-    public function updateBookById($id, $data)
+    public function updateById($id, $data)
     {
         $result = $this->update(['_id' => intval($id)], $data);
 
         return $result;
     }
 
-    public function deleteBookById($id)
+    public function deleteById($id)
     {
         $result = $this->delete(['_id' => intval($id)]);
 

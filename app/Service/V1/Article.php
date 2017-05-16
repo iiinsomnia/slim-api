@@ -1,27 +1,24 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\V1;
 
 use App\Cache\ArticleCache;
 use App\Dao\MySQL\ArticleDao;
+use App\Service\Service;
 use Psr\Container\ContainerInterface;
 
-class Article extends IIInsomnia
+class Article extends Service
 {
-    private $_di;
-
-    function __construct(ContainerInterface $di)
+    function __construct(ContainerInterface $c)
     {
-        parent::__construct($di);
-
-        $this->_di = $di;
+        parent::__construct($c);
     }
 
     // 处理文章列表请求
     public function handleActionList(&$resCode, &$resMsg, &$resData)
     {
-        $articleDao = new ArticleDao($this->_di);
-        $dbData = $articleDao->getAllArticles();
+        $articleDao = new ArticleDao($this->container);
+        $dbData = $articleDao->getAll();
 
         $resData = $dbData;
 
@@ -31,23 +28,23 @@ class Article extends IIInsomnia
     // 处理文章详情请求
     public function handleActionDetail($id, &$resCode, &$resMsg, &$resData)
     {
-        $articleCache = new ArticleCache($this->_di);
-        $cacheData = $articleCache->getArticleCache($id);
+        $articleCache = new ArticleCache($this->container);
+        $cacheData = $articleCache->getCacheById($id);
 
         if (!empty($cacheData)) {
             $resData = $cacheData;
             return;
         }
 
-        $articleDao = new ArticleDao($this->_di);
-        $dbData = $articleDao->getArticleById($id);
+        $articleDao = new ArticleDao($this->container);
+        $dbData = $articleDao->getById($id);
 
         if (empty($dbData)) {
             $resData = null;
             return;
         }
 
-        $articleCache->setArticleCache($id, $dbData);
+        $articleCache->setCacheById($id, $dbData);
 
         $resData = $dbData;
 
@@ -57,8 +54,8 @@ class Article extends IIInsomnia
     // 处理文章添加请求
     public function handleActionAdd($postData, &$resCode, &$resMsg, &$resData)
     {
-        $articleDao = new ArticleDao($this->_di);
-        $id = $articleDao->addNewArticle($postData);
+        $articleDao = new ArticleDao($this->container);
+        $id = $articleDao->addNew($postData);
 
         if (!$id) {
             $resCode = -1;
@@ -76,11 +73,11 @@ class Article extends IIInsomnia
     public function handleActionUpdate($id, $putData, &$resCode, &$resMsg)
     {
         // 删除文章缓存
-        $articleCache = new ArticleCache($this->_di);
-        $articleCache->delArticleCache($id);
+        $articleCache = new ArticleCache($this->container);
+        $articleCache->delCacheById($id);
 
-        $articleDao = new ArticleDao($this->_di);
-        $result = $articleDao->updateArticleById($id, $putData);
+        $articleDao = new ArticleDao($this->container);
+        $result = $articleDao->updateById($id, $putData);
 
         if (!$result) {
             $resCode = -1;
@@ -94,11 +91,11 @@ class Article extends IIInsomnia
     public function handleActionDelete($id, &$resCode, &$resMsg)
     {
         // 删除文章缓存
-        $articleCache = new ArticleCache($this->_di);
-        $articleCache->delArticleCache($id);
+        $articleCache = new ArticleCache($this->container);
+        $articleCache->delCacheById($id);
 
-        $articleDao = new ArticleDao($this->_di);
-        $result = $articleDao->deleteArticleById($id);
+        $articleDao = new ArticleDao($this->container);
+        $result = $articleDao->deleteById($id);
 
         if (!$result) {
             $resCode = -1;

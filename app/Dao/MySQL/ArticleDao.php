@@ -7,19 +7,19 @@ use Psr\Container\ContainerInterface;
 class ArticleDao extends MySQL
 {
     // constructor receives container instance
-    public function __construct(ContainerInterface $di)
+    public function __construct(ContainerInterface $c)
     {
-        parent::__construct($di, 'article');
+        parent::__construct($c, 'article');
     }
 
-    public function getAllArticles()
+    public function getAll()
     {
         $data = $this->findAll();
 
         return $data;
     }
 
-    public function getArticleById($id)
+    public function getById($id)
     {
         $data = $this->findOne([
                 'where' => 'id = ?',
@@ -29,14 +29,14 @@ class ArticleDao extends MySQL
         return $data;
     }
 
-    public function addNewArticle($data)
+    public function addNew($data)
     {
         $result = $this->insert($data);
 
         return $result;
     }
 
-    public function updateArticleById($id, $data)
+    public function updateById($id, $data)
     {
         $result = $this->update([
                 'where' => 'id = ?',
@@ -46,7 +46,7 @@ class ArticleDao extends MySQL
         return $result;
     }
 
-    public function deleteArticleById($id)
+    public function deleteById($id)
     {
         $result = $this->delete([
                 'where' => 'id = ?',

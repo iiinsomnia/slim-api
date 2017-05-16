@@ -6,15 +6,16 @@ use Psr\Container\ContainerInterface;
 
 class AuthMiddleware
 {
-    private $_di;
-
     protected $code;
     protected $msg;
 
-    function __construct(ContainerInterface $di) {
-        $this->_di = $di;
+    protected $container;
+
+    function __construct(ContainerInterface $c) {
         $this->code = 0;
         $this->msg = 'success';
+
+        $this->container = $c;
     }
 
     /**
@@ -70,7 +71,7 @@ class AuthMiddleware
     // 验证登录
     protected function validateLogin($uuid)
     {
-        $authCache = new AuthCache($this->_di);
+        $authCache = new AuthCache($this->container);
         $loginInfo = $authCache->getAuthCache($uuid);
 
         if (empty($loginInfo)) {
@@ -91,7 +92,7 @@ class AuthMiddleware
     }
 
     // 验签
-    protected function validateSign($uuid, $accessTime, $accessSign, $query)
+    protected function validateSign($uuid, $accessTime, $accessSign, $path, $query)
     {
         $accessExpire = env('ACCESS_EXPIRE', 0);
 
@@ -104,7 +105,7 @@ class AuthMiddleware
             }
         }
 
-        $authCache = new AuthCache($this->_di);
+        $authCache = new AuthCache($this->container);
         $token = $authCache->getAuthToken($uuid);
 
         array_shift($query);

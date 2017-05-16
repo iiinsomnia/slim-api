@@ -7,16 +7,36 @@ use Psr\Container\ContainerInterface;
 class UserDao extends MySQL
 {
     // constructor receives container instance
-    public function __construct(ContainerInterface $di)
+    function __construct(ContainerInterface $c)
     {
-        parent::__construct($di, 'user');
+        parent::__construct($c, 'user');
     }
 
-    public function findUserById($id)
+    public function getById($id)
     {
         $data = $this->findOne([
                 'where' => 'id = ?',
                 'binds' => [$id],
+            ]);
+
+        return $data;
+    }
+
+    public function getByName($name)
+    {
+        $data = $this->findOne([
+                'where' => 'name = ?',
+                'binds' => [$name],
+            ]);
+
+        return $data;
+    }
+
+    public function getByPhone($phone)
+    {
+        $data = $this->findOne([
+                'where' => 'phone = ?',
+                'binds' => [$phone],
             ]);
 
         return $data;

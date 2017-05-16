@@ -1,24 +1,23 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\V1;
 
 use App\Dao\Mongo\BookDao;
+use App\Service\Service;
 use Psr\Container\ContainerInterface;
 
-class Book extends IIInsomnia
+class Book extends Service
 {
-    private $_di;
-
-    function __construct(ContainerInterface $di)
+    function __construct(ContainerInterface $c)
     {
-        $this->_di = $di;
+        parent::__construct($c);
     }
 
     // 处理书籍列表请求
     public function handleActionList(&$resCode, &$resMsg, &$resData)
     {
-        $bookDao = new BookDao($this->_di);
-        $dbData = $bookDao->getAllBooks();
+        $bookDao = new BookDao($this->container);
+        $dbData = $bookDao->getAll();
 
         $resData = $dbData;
 
@@ -28,8 +27,8 @@ class Book extends IIInsomnia
     // 处理书籍详情请求
     public function handleActionDetail($id, &$resCode, &$resMsg, &$resData)
     {
-        $bookDao = new BookDao($this->_di);
-        $dbData = $bookDao->getBookById(['_id' => intval($id)]);
+        $bookDao = new BookDao($this->container);
+        $dbData = $bookDao->getById(['_id' => intval($id)]);
 
         if (!$dbData) {
             $resData = [];
@@ -44,8 +43,8 @@ class Book extends IIInsomnia
     // 处理书籍添加请求
     public function handleActionAdd($postData, &$resCode, &$resMsg, &$resData)
     {
-        $bookDao = new BookDao($this->_di);
-        $id = $bookDao->addNewBook($postData);
+        $bookDao = new BookDao($this->container);
+        $id = $bookDao->addNew($postData);
 
         if (!$id) {
             $resCode = -1;
@@ -62,8 +61,8 @@ class Book extends IIInsomnia
     // 处理书籍编辑请求
     public function handleActionUpdate($id, $putData, &$resCode, &$resMsg)
     {
-        $bookDao = new BookDao($this->_di);
-        $result = $bookDao->updateBookById(['_id' => intval($id)], $resData);
+        $bookDao = new BookDao($this->container);
+        $result = $bookDao->updateById(['_id' => intval($id)], $resData);
 
         if (!$result) {
             $resCode = -1;
@@ -76,8 +75,8 @@ class Book extends IIInsomnia
     // 处理书籍删除请求
     public function handleActionDelete($id, &$resCode, &$resMsg)
     {
-        $bookDao = new BookDao($this->_di);
-        $result = $bookDao->deleteBookById(['_id' => intval($id)]);
+        $bookDao = new BookDao($this->container);
+        $result = $bookDao->deleteById(['_id' => intval($id)]);
 
         if (!$result) {
             $resCode = -1;

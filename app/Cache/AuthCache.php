@@ -11,9 +11,9 @@ class AuthCache
     private $_cacheSessionKey = "auth:session";
     private $_cacheDeviceKey = "auth:device";
 
-    function __construct(ContainerInterface $di)
+    function __construct(ContainerInterface $c)
     {
-        $this->_redis = $di->get('redis');
+        $this->_redis = $c->get('redis');
     }
 
     // 设置登录验证用户信息缓存，token相当于sessionID

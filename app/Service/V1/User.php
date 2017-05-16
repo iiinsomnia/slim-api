@@ -1,17 +1,14 @@
 <?php
-namespace App\Service;
+namespace App\Service\V1;
 
+use App\Service\Service;
 use Psr\Container\ContainerInterface;
 
-class User extends IIInsomnia
+class User extends Service
 {
-    private $_di;
-
-    function __construct(ContainerInterface $di)
+    function __construct(ContainerInterface $c)
     {
-        parent::__construct($di);
-
-        $this->_di = $di;
+        parent::__construct($c);
     }
 
     public function handleActionView($uuid, &$resCode, &$resMsg, &$resData)

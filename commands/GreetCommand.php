@@ -10,7 +10,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class GreetCommand extends Command
 {
-    private $_di;
+    protected $container;
 
     protected $commandName = 'greet';
     protected $commandDescription = "Greets Someone";
@@ -21,11 +21,11 @@ class GreetCommand extends Command
     protected $commandOptionName = "cap"; // should be specified like "app:greet John --cap"
     protected $commandOptionDescription = 'If set, it will greet in uppercase letters';
 
-    function __construct(ContainerInterface $di)
+    function __construct(ContainerInterface $c)
     {
         parent::__construct();
 
-        $this->_di = $di;
+        $this->container = $c;
     }
 
     protected function configure()

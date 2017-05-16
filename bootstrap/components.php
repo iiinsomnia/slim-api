@@ -75,7 +75,7 @@ if (!env('APP_DEBUG', true)) {
                 ]);
 
             return $response->withJson([
-                'code' => -1,
+                'code' => 500,
                 'msg' => 'server internal error',
             ], 200);
         };
@@ -91,7 +91,7 @@ if (!env('APP_DEBUG', true)) {
                 ]);
 
             return $response->withJson([
-                'code' => -1,
+                'code' => 500,
                 'msg' => 'server internal error',
             ], 200);
         };
