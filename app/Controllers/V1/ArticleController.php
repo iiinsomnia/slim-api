@@ -16,16 +16,14 @@ class ArticleController extends Controller
     public function actionList($request, $response, $args)
     {
         // $query = $request->getQueryParams();
-        $article = new Article($this->container);
-        $article->handleActionList($this->code, $this->msg, $this->data);
+        $this->container->Article->handleActionList($this->code, $this->msg, $this->data);
 
         return $this->json($response);
     }
 
     public function actionDetail($request, $response, $args)
     {
-        $article = new Article($this->container);
-        $article->handleActionDetail($args['id'], $this->code, $this->msg, $this->data);
+        $this->container->Article->handleActionDetail($args['id'], $this->code, $this->msg, $this->data);
 
         return $this->json($response);
     }
@@ -34,8 +32,7 @@ class ArticleController extends Controller
     {
         $postData = $request->getParsedBody();
 
-        $article = new Article($this->container);
-        $article->handleActionAdd($postData, $this->code, $this->msg, $this->data);
+        $this->container->Article->handleActionAdd($postData, $this->code, $this->msg, $this->data);
 
         return $this->json($response);
     }
@@ -44,16 +41,14 @@ class ArticleController extends Controller
     {
         $putData = $request->getParsedBody();
 
-        $article = new Article($this->container);
-        $article->handleActionUpdate($args['id'], $putData, $this->code, $this->msg);
+        $this->container->Article->handleActionUpdate($args['id'], $putData, $this->code, $this->msg);
 
         return $this->json($response);
     }
 
     public function actionDelete($request, $response, $args)
     {
-        $article = new Article($this->container);
-        $article->handleActionDelete($args['id'], $this->code, $this->msg);
+        $this->container->Article->handleActionDelete($args['id'], $this->code, $this->msg);
 
         return $this->json($response);
     }

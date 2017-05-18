@@ -24,5 +24,5 @@ $app->group('/v1', function () {
     $this->post('/books', '\App\Controllers\V1\BookController:actionAdd');
     $this->put('/books/{id}', '\App\Controllers\V1\BookController:actionUpdate');
     $this->delete('/books/{id}', '\App\Controllers\V1\BookController:actionDelete');
-})->add(\App\Middlewares\AuthMiddleware::class);
+});//->add(\App\Middlewares\AuthMiddleware::class);
 ?>

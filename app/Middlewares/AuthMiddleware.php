@@ -35,8 +35,8 @@ class AuthMiddleware
 
         if (empty($accessSign) || empty($accessTime) || empty($uuid)) {
             return $response->withJson([
-                'code' => -1,
-                'msg' => 'Invalid token, access failed!',
+                'code' => 403,
+                'msg'  => 'Invalid token, access failed!',
             ], 200);
         }
 
@@ -71,18 +71,17 @@ class AuthMiddleware
     // 验证登录
     protected function validateLogin($uuid)
     {
-        $authCache = new AuthCache($this->container);
-        $loginInfo = $authCache->getAuthCache($uuid);
+        $loginInfo = $this->container->AuthCache->getAuthData($uuid);
 
         if (empty($loginInfo)) {
-            $this->code = 403;
+            $this->code = 401;
             $this->msg = '用户未登录';
 
             return false;
         }
 
         if ($loginInfo['expire_time'] > 0 && $loginInfo['expire_time'] <= time()) {
-            $this->code = 403;
+            $this->code = 401;
             $this->msg = '登录已过期';
 
             return false;
@@ -105,8 +104,7 @@ class AuthMiddleware
             }
         }
 
-        $authCache = new AuthCache($this->container);
-        $token = $authCache->getAuthToken($uuid);
+        $token = $this->container->AuthCache->getAuthToken($uuid);
 
         array_shift($query);
         $query['token'] = $token;

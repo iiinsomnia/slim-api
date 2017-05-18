@@ -15,8 +15,7 @@ class Service
 
     protected function getUserId($uuid)
     {
-        $authCache = new AuthCache($this->container);
-        $loginInfo = $authCache->getAuthCache($uuid);
+        $loginInfo = $this->container->AuthCache->getAuthData($uuid);
 
         if (empty($loginInfo)) {
             return 0;
@@ -27,8 +26,7 @@ class Service
 
     protected function getUserInfo($uuid)
     {
-        $authCache = new AuthCache($this->container);
-        $loginInfo = $authCache->getAuthCache($uuid);
+        $loginInfo = $this->container->AuthCache->getAuthData($uuid);
 
         if (empty($loginInfo)) {
             return [];

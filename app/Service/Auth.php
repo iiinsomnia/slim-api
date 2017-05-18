@@ -8,7 +8,7 @@ use Psr\Container\ContainerInterface;
 
 class Auth
 {
-    private $container;
+    protected $container;
 
     function __construct(ContainerInterface $di)
     {
@@ -32,8 +32,7 @@ class Auth
             return;
         }
 
-        $userDao = new UserDao($this->container);
-        $userDbData = $userDao->getByPhone($postData['phone']);
+        $userDbData = $this->container->UserDao->getByPhone($postData['phone']);
 
         if (!$userDbData) {
             $resCode = -1;
@@ -57,8 +56,7 @@ class Auth
         }
 
         // 注销上一次登录信息
-        $authCache = new AuthCache($this->container);
-        $authCache->delAuthCacheByPhone($postData['phone']);
+        $this->container->AuthCache->delAuthDataByPhone($postData['phone']);
 
         $token = $this->signin($uuid, $userDbData);
 
@@ -70,8 +68,7 @@ class Auth
     // 处理退出请求
     public function handleActionLogout($uuid)
     {
-        $authCache = new AuthCache($this->container);
-        $authCache->delAuthCacheByUuid($uuid);
+        $this->container->AuthCache->delAuthDataByUuid($uuid);
 
         return;
     }
@@ -98,8 +95,7 @@ class Auth
             'expire_time' => $expireTime,
         ];
 
-        $authCache = new AuthCache($this->container);
-        $authCache->setAuthCache($userDbData['phone'], $uuid, $token, $cacheData);
+        $this->container->AuthCache->setAuthData($userDbData['phone'], $uuid, $token, $cacheData);
 
         return $token;
     }

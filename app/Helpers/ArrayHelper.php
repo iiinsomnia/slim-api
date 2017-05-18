@@ -128,34 +128,39 @@ class ArrayHelper
     }
 
     /**
-     * Removes an item from an array and returns the value. If the key does not exist in the array, the default value
-     * will be returned instead.
+     * Removes an item from an array
      *
-     * Usage examples,
+     * Usage examples:
      *
      * ```php
-     * // $array = ['type' => 'A', 'options' => [1, 2]];
-     * // working with array
-     * $type = \yii\helpers\ArrayHelper::remove($array, 'type');
-     * // $array content
-     * // $array = ['options' => [1, 2]];
+     * $array = [
+     *     ['id' => '123', 'data' => 'abc', 'device' => 'laptop'],
+     *     ['id' => '345', 'data' => 'def', 'device' => 'tablet'],
+     *     ['id' => '345', 'data' => 'hgi', 'device' => 'smartphone'],
+     * ];
+     * ArrayHelper::index($array, 'device');
+     * ```
+     *
+     * The result will be the array which item named $key are removed.
+     *
+     * ```php
+     * $array = [
+     *     ['id' => '123', 'data' => 'abc'],
+     *     ['id' => '345', 'data' => 'def'],
+     *     ['id' => '345', 'data' => 'hgi'],
+     * ];
      * ```
      *
      * @param array $array the array to extract value from
      * @param string $key key name of the array element
-     * @param mixed $default the default value to be returned if the specified key does not exist
-     * @return mixed|null the value of the element if found, default value otherwise
      */
-    public static function remove(&$array, $key, $default = null)
+    public static function remove(&$array, $key)
     {
-        if (is_array($array) && (isset($array[$key]) || array_key_exists($key, $array))) {
-            $value = $array[$key];
-            unset($array[$key]);
-
-            return $value;
+        foreach ($array as &$element) {
+            if (isset($elements[$key]) || array_key_exists($key, $element)) {
+                unset($element[$key]);
+            }
         }
-
-        return $default;
     }
 
     /**

@@ -17,8 +17,7 @@ class UserController extends Controller
     {
         $uuid = $request->getHeader('Access-UUID');
 
-        $user = new User($this->container);
-        $user->handleActionView($uuid[0], $this->code, $this->msg, $this->data);
+        $this->container->User->handleActionView($uuid[0], $this->code, $this->msg, $this->data);
 
         return $this->json($response);
     }

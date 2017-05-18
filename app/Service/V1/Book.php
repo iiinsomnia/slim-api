@@ -16,8 +16,7 @@ class Book extends Service
     // 处理书籍列表请求
     public function handleActionList(&$resCode, &$resMsg, &$resData)
     {
-        $bookDao = new BookDao($this->container);
-        $dbData = $bookDao->getAll();
+        $dbData = $this->container->BookDao->getAll();
 
         $resData = $dbData;
 
@@ -27,8 +26,7 @@ class Book extends Service
     // 处理书籍详情请求
     public function handleActionDetail($id, &$resCode, &$resMsg, &$resData)
     {
-        $bookDao = new BookDao($this->container);
-        $dbData = $bookDao->getById(['_id' => intval($id)]);
+        $dbData = $this->container->BookDao->getById(['_id' => intval($id)]);
 
         if (!$dbData) {
             $resData = [];
@@ -43,8 +41,7 @@ class Book extends Service
     // 处理书籍添加请求
     public function handleActionAdd($postData, &$resCode, &$resMsg, &$resData)
     {
-        $bookDao = new BookDao($this->container);
-        $id = $bookDao->addNew($postData);
+        $id = $this->container->BookDao->addNew($postData);
 
         if (!$id) {
             $resCode = -1;
@@ -61,8 +58,7 @@ class Book extends Service
     // 处理书籍编辑请求
     public function handleActionUpdate($id, $putData, &$resCode, &$resMsg)
     {
-        $bookDao = new BookDao($this->container);
-        $result = $bookDao->updateById(['_id' => intval($id)], $resData);
+        $result = $this->container->BookDao->updateById(['_id' => intval($id)], $resData);
 
         if (!$result) {
             $resCode = -1;
@@ -75,8 +71,7 @@ class Book extends Service
     // 处理书籍删除请求
     public function handleActionDelete($id, &$resCode, &$resMsg)
     {
-        $bookDao = new BookDao($this->container);
-        $result = $bookDao->deleteById(['_id' => intval($id)]);
+        $result = $this->container->BookDao->deleteById(['_id' => intval($id)]);
 
         if (!$result) {
             $resCode = -1;

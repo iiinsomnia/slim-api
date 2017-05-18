@@ -14,12 +14,12 @@ class ArticleCache
         $this->_redis = $c->get('redis');
     }
 
-    public function setCacheById($articleId, $data)
+    public function setArticleById($articleId, $data)
     {
         $this->_redis->hset($this->_cacheKey, $articleId, json_encode($data));
     }
 
-    public function getCacheById($articleId)
+    public function getArticleById($articleId)
     {
         $data = $this->_redis->hget($this->_cacheKey, $articleId);
 
@@ -30,7 +30,7 @@ class ArticleCache
         return json_decode($data, true);
     }
 
-    public function delCacheById($articleId)
+    public function delArticleById($articleId)
     {
         $this->_redis->hdel($this->_cacheKey, $articleId);
     }

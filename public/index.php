@@ -20,8 +20,13 @@ require __DIR__ . '/../bootstrap/env.php';
 $settings = require __DIR__ . '/../config/settings.php';
 $app = new \Slim\App($settings);
 
-// Set up components
-require __DIR__ . '/../bootstrap/components.php';
+// Set up bootstrap dependencies
+require __DIR__ . '/../bootstrap/bootstrap.php';
+
+// Set up dao & cache & service providers
+require __DIR__ . '/../provider/dao.php';
+require __DIR__ . '/../provider/cache.php';
+require __DIR__ . '/../provider/service.php';
 
 // Register routes
 require __DIR__ . '/../app/routes.php';

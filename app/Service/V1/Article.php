@@ -17,8 +17,7 @@ class Article extends Service
     // 处理文章列表请求
     public function handleActionList(&$resCode, &$resMsg, &$resData)
     {
-        $articleDao = new ArticleDao($this->container);
-        $dbData = $articleDao->getAll();
+        $dbData = $this->container->ArticleDao->getAll();
 
         $resData = $dbData;
 
@@ -28,23 +27,21 @@ class Article extends Service
     // 处理文章详情请求
     public function handleActionDetail($id, &$resCode, &$resMsg, &$resData)
     {
-        $articleCache = new ArticleCache($this->container);
-        $cacheData = $articleCache->getCacheById($id);
+        $cacheData = $this->container->ArticleCache->getArticleById($id);
 
         if (!empty($cacheData)) {
             $resData = $cacheData;
             return;
         }
 
-        $articleDao = new ArticleDao($this->container);
-        $dbData = $articleDao->getById($id);
+        $dbData = $this->container->ArticleDao->getById($id);
 
         if (empty($dbData)) {
             $resData = null;
             return;
         }
 
-        $articleCache->setCacheById($id, $dbData);
+        $this->container->ArticleCache->setArticleById($id, $dbData);
 
         $resData = $dbData;
 
@@ -54,8 +51,7 @@ class Article extends Service
     // 处理文章添加请求
     public function handleActionAdd($postData, &$resCode, &$resMsg, &$resData)
     {
-        $articleDao = new ArticleDao($this->container);
-        $id = $articleDao->addNew($postData);
+        $id = $this->container->ArticleDao->addNew($postData);
 
         if (!$id) {
             $resCode = -1;
@@ -73,11 +69,9 @@ class Article extends Service
     public function handleActionUpdate($id, $putData, &$resCode, &$resMsg)
     {
         // 删除文章缓存
-        $articleCache = new ArticleCache($this->container);
-        $articleCache->delCacheById($id);
+        $this->container->ArticleCache->delArticleById($id);
 
-        $articleDao = new ArticleDao($this->container);
-        $result = $articleDao->updateById($id, $putData);
+        $result = $this->container->ArticleDao->updateById($id, $putData);
 
         if (!$result) {
             $resCode = -1;
@@ -91,11 +85,9 @@ class Article extends Service
     public function handleActionDelete($id, &$resCode, &$resMsg)
     {
         // 删除文章缓存
-        $articleCache = new ArticleCache($this->container);
-        $articleCache->delCacheById($id);
+        $this->container->ArticleCache->delArticleById($id);
 
-        $articleDao = new ArticleDao($this->container);
-        $result = $articleDao->deleteById($id);
+        $result = $this->container->ArticleDao->deleteById($id);
 
         if (!$result) {
             $resCode = -1;

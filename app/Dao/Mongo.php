@@ -14,10 +14,11 @@ use Psr\Container\ContainerInterface;
  */
 class Mongo
 {
-    private $_di;
     private $_collection;
     private $_sequence;
     private $_seqId;
+
+    protected $container;
 
     /**
      * constructor receives container instance
@@ -25,18 +26,18 @@ class Mongo
      * @param string $collection 集合名称
      * @param string $db 数据库配置名称，默认：mongo
      */
-    public function __construct(ContainerInterface $di, $collection, $db = 'mongo'){
-        $this->_di = $di;
+    public function __construct(ContainerInterface $c, $collection, $db = 'mongo'){
+        $mongo = $c->get($db);
+        $settings = $c->get('settings')[$db];
 
-        $mongo = $di->get($db);
-
-        $settings = $di->get('settings')[$db];
         $db = $settings['database'];
         $table = sprintf("%s%s", $settings['prefix'], $collection);
 
         $this->_collection = $mongo->$db->$table;
         $this->_sequence = $mongo->$db->sequence;
         $this->_seqId = $collection;
+
+        $this->container = $c;
     }
 
     /**
@@ -56,21 +57,21 @@ class Mongo
         } catch (InvalidArgumentException $e) {
             $this->_refreshSequence(-1);
 
-            $logger = $this->_di->get('logger');
+            $logger = $this->container->get('logger');
             $logger->error(sprintf("[Mongo] Insert Error: %s", $e->getMessage()));
 
             return false;
         } catch (BulkWriteException $e) {
             $this->_refreshSequence(-1);
 
-            $logger = $this->_di->get('logger');
+            $logger = $this->container->get('logger');
             $logger->error(sprintf("[Mongo] Insert Error: %s", $e->getMessage()));
 
             return false;
         } catch (RuntimeException $e) {
             $this->_refreshSequence(-1);
 
-            $logger = $this->_di->get('logger');
+            $logger = $this->container->get('logger');
             $logger->error(sprintf("[Mongo] Insert Error: %s", $e->getMessage()));
 
             return false;
@@ -99,21 +100,21 @@ class Mongo
         } catch (InvalidArgumentException $e) {
             $this->_refreshSequence(~$count + 1);
 
-            $logger = $this->_di->get('logger');
+            $logger = $this->container->get('logger');
             $logger->error(sprintf("[Mongo] BatchInsert Error: %s", $e->getMessage()));
 
             return false;
         } catch (BulkWriteException $e) {
             $this->_refreshSequence(~$count + 1);
 
-            $logger = $this->_di->get('logger');
+            $logger = $this->container->get('logger');
             $logger->error(sprintf("[Mongo] BatchInsert Error: %s", $e->getMessage()));
 
             return false;
         } catch (RuntimeException $e) {
             $this->_refreshSequence(~$count + 1);
 
-            $logger = $this->_di->get('logger');
+            $logger = $this->container->get('logger');
             $logger->error(sprintf("[Mongo] BatchInsert Error: %s", $e->getMessage()));
 
             return false;
@@ -133,22 +134,22 @@ class Mongo
 
             return $result->getModifiedCount();
         } catch (UnsupportedException $e) {
-            $logger = $this->_di->get('logger');
+            $logger = $this->container->get('logger');
             $logger->error(sprintf("[Mongo] Update Error: %s", $e->getMessage()));
 
             return false;
         } catch (InvalidArgumentException $e) {
-            $logger = $this->_di->get('logger');
+            $logger = $this->container->get('logger');
             $logger->error(sprintf("[Mongo] Update Error: %s", $e->getMessage()));
 
             return false;
         } catch (BulkWriteException $e) {
-            $logger = $this->_di->get('logger');
+            $logger = $this->container->get('logger');
             $logger->error(sprintf("[Mongo] Update Error: %s", $e->getMessage()));
 
             return false;
         } catch (RuntimeException $e) {
-            $logger = $this->_di->get('logger');
+            $logger = $this->container->get('logger');
             $logger->error(sprintf("[Mongo] Update Error: %s", $e->getMessage()));
 
             return false;
@@ -168,22 +169,22 @@ class Mongo
 
             return $result->getModifiedCount();
         } catch (UnsupportedException $e) {
-            $logger = $this->_di->get('logger');
+            $logger = $this->container->get('logger');
             $logger->error(sprintf("[Mongo] BatchUpdate Error: %s", $e->getMessage()));
 
             return false;
         } catch (InvalidArgumentException $e) {
-            $logger = $this->_di->get('logger');
+            $logger = $this->container->get('logger');
             $logger->error(sprintf("[Mongo] BatchUpdate Error: %s", $e->getMessage()));
 
             return false;
         } catch (BulkWriteException $e) {
-            $logger = $this->_di->get('logger');
+            $logger = $this->container->get('logger');
             $logger->error(sprintf("[Mongo] BatchUpdate Error: %s", $e->getMessage()));
 
             return false;
         } catch (RuntimeException $e) {
-            $logger = $this->_di->get('logger');
+            $logger = $this->container->get('logger');
             $logger->error(sprintf("[Mongo] BatchUpdate Error: %s", $e->getMessage()));
 
             return false;
@@ -251,22 +252,22 @@ class Mongo
 
             return $result->getDeletedCount();
         } catch (UnsupportedException $e) {
-            $logger = $this->_di->get('logger');
+            $logger = $this->container->get('logger');
             $logger->error(sprintf("[Mongo] Delete Error: %s", $e->getMessage()));
 
             return false;
         } catch (InvalidArgumentException $e) {
-            $logger = $this->_di->get('logger');
+            $logger = $this->container->get('logger');
             $logger->error(sprintf("[Mongo] Delete Error: %s", $e->getMessage()));
 
             return false;
         } catch (BulkWriteException $e) {
-            $logger = $this->_di->get('logger');
+            $logger = $this->container->get('logger');
             $logger->error(sprintf("[Mongo] Delete Error: %s", $e->getMessage()));
 
             return false;
         } catch (RuntimeException $e) {
-            $logger = $this->_di->get('logger');
+            $logger = $this->container->get('logger');
             $logger->error(sprintf("[Mongo] Delete Error: %s", $e->getMessage()));
 
             return false;
@@ -285,22 +286,22 @@ class Mongo
 
             return $result;
         } catch (UnsupportedException $e) {
-            $logger = $this->_di->get('logger');
+            $logger = $this->container->get('logger');
             $logger->error(sprintf("[Mongo] BatchDelete Error: %s", $e->getMessage()));
 
             return false;
         } catch (InvalidArgumentException $e) {
-            $logger = $this->_di->get('logger');
+            $logger = $this->container->get('logger');
             $logger->error(sprintf("[Mongo] BatchDelete Error: %s", $e->getMessage()));
 
             return false;
         } catch (BulkWriteException $e) {
-            $logger = $this->_di->get('logger');
+            $logger = $this->container->get('logger');
             $logger->error(sprintf("[Mongo] BatchDelete Error: %s", $e->getMessage()));
 
             return false;
         } catch (RuntimeException $e) {
-            $logger = $this->_di->get('logger');
+            $logger = $this->container->get('logger');
             $logger->error(sprintf("[Mongo] BatchDelete Error: %s", $e->getMessage()));
 
             return false;

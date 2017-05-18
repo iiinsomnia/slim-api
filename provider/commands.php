@@ -4,7 +4,7 @@ $container = $app->getContainer();
 
 // GreetCommand
 $container['greet'] = function ($c) {
-    $cmd = new \Commands\GreetCommand($c);
+    $cmd = new \App\Commands\GreetCommand($c);
 
     return $cmd;
 };

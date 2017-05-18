@@ -18,8 +18,8 @@ class UUIDMiddleware
 
         if (empty($uuid) || trim($uuid[0]) == '') {
             return $response->withJson([
-                'code' => -1,
-                'msg' => 'Invalid token, access failed!',
+                'code' => 403,
+                'msg'  => 'Invalid token, access failed!',
             ], 200);
         }
 

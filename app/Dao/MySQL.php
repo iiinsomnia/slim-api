@@ -146,7 +146,7 @@ class MySQL
      *        [
      *            'select' => 'a.id, a.name, b.name AS username',
      *            'join'   => ['LEFT JOIN slim_user AS b ON a.uid = b.id'],
-     *            'where'  => 'a.id IN (?) AND a.status = ?,
+     *            'where'  => 'a.id IN [?] AND a.status = ?,
      *            'order'  => 'a.id DESC',
      *            'offset' => 0,
      *            'limit'  => 10,
@@ -421,11 +421,13 @@ class MySQL
                 }
 
                 $bindvar = sprintf("(%s)", implode(', ', $placeholders));
-                $sql = preg_replace('/\(\?\)/', $bindvar, $sql);
+                $sql = preg_replace('/\[\?\]/', $bindvar, $sql, 1);
 
                 array_splice($binds, $k, 1, $v);
 
-                break;
+                $this->_buildIn($sql, $binds);
+
+                return;
             }
         }
 
