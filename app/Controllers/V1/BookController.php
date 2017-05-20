@@ -16,14 +16,14 @@ class BookController extends Controller
     public function actionList($request, $response, $args)
     {
         // $query = $request->getQueryParams();
-        $this->container->Book->handleActionList($this->code, $this->msg, $this->data);
+        $this->container->BookV1->handleActionList($this->code, $this->msg, $this->data);
 
         return $this->json($response);
     }
 
     public function actionDetail($request, $response, $args)
     {
-        $this->container->Book->handleActionDetail($args['id'], $this->code, $this->msg, $this->data);
+        $this->container->BookV1->handleActionDetail($args['id'], $this->code, $this->msg, $this->data);
 
         return $this->json($response);
     }
@@ -32,7 +32,7 @@ class BookController extends Controller
     {
         $postData = $request->getParsedBody();
 
-        $this->container->Book->handleActionAdd($postData, $this->code, $this->msg, $this->data);
+        $this->container->BookV1->handleActionAdd($postData, $this->code, $this->msg, $this->data);
 
         return $this->json($response);
     }
@@ -41,14 +41,14 @@ class BookController extends Controller
     {
         $putData = $request->getParsedBody();
 
-        $this->container->Book->handleActionUpdate($args['id'], $putData, $this->code, $this->msg);
+        $this->container->BookV1->handleActionUpdate($args['id'], $putData, $this->code, $this->msg);
 
         return $this->json($response);
     }
 
     public function actionDelete($request, $response, $args)
     {
-        $this->container->Book->handleActionDelete($args['id'], $this->code, $this->msg);
+        $this->container->BookV1->handleActionDelete($args['id'], $this->code, $this->msg);
 
         return $this->json($response);
     }

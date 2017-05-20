@@ -1,6 +1,10 @@
 <?php
-$dotenv = new Dotenv\Dotenv(__DIR__ . '/../');
-$dotenv->load();
+try {
+    $dotenv = new Dotenv\Dotenv(__DIR__ . '/../');
+    $dotenv->load();
+} catch (\Dotenv\Exception\InvalidPathException $e) {
+    //
+}
 
 if (!function_exists('env')) {
     /**

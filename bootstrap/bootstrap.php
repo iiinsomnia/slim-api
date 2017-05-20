@@ -64,7 +64,27 @@ $container['logger'] = function ($c) {
     return $logger;
 };
 
-if (!env('APP_DEBUG', true)) {
+if (!env('APP_DEBUG', false)) {
+    // 404NotFound
+    $container['notFoundHandler'] = function ($c) {
+        return function ($request, $response) use ($c) {
+            return $response->withJson([
+                'code' => 404,
+                'msg' => 'page not found',
+            ], 200);
+        };
+    };
+
+    // 405NotAllowed
+    $container['notAllowedHandler'] = function ($c) {
+        return function ($request, $response, $methods) use ($c) {
+            return $response->withJson([
+                'code' => 405,
+                'msg' => 'method not allowed',
+            ], 200);
+        };
+    };
+
     // ErrorHandler
     $container['errorHandler'] = function ($c) {
         return function ($request, $response, $error) use ($c) {

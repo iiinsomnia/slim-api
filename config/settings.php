@@ -3,8 +3,8 @@ $params = require(__DIR__ . '/params.php');
 
 return [
     'settings' => [
-        'debug'                  => env('APP_DEBUG', true),
-        'displayErrorDetails'    => env('APP_DEBUG', true), // set to false in production
+        'debug'                  => env('APP_DEBUG', false),
+        'displayErrorDetails'    => env('APP_DEBUG', false), // set to false in production
         'addContentLengthHeader' => false, // Allow the web server to send the content-length header
 
         // db settings
@@ -41,7 +41,7 @@ return [
         // Monolog settings
         'logger' => [
             'name'  => 'Monlog',
-            'path'  => env('LOG_PATH', __DIR__ . '/../logs/').date('Y-m-d').'.log',
+            'path'  => env('LOG_PATH', __DIR__ . '/../logs/') . date('Y-m-d') . '.log',
             'level' => \Monolog\Logger::DEBUG,
         ],
     ],
