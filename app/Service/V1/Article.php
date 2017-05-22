@@ -73,7 +73,7 @@ class Article extends Service
 
         $result = $this->container->ArticleDao->updateById($id, $putData);
 
-        if (!$result) {
+        if ($result === false) {
             $resCode = -1;
             $resMsg = 'failed';
         }
@@ -89,7 +89,7 @@ class Article extends Service
 
         $result = $this->container->ArticleDao->deleteById($id);
 
-        if (!$result) {
+        if ($result === false) {
             $resCode = -1;
             $resMsg = 'failed';
         }

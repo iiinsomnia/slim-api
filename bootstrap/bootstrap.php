@@ -94,6 +94,8 @@ if (!env('APP_DEBUG', false)) {
                     'line'    => $error->getLine(),
                 ]);
 
+            \App\Helpers\MailerHelper::sendErrorMail($error);
+
             return $response->withJson([
                 'code' => 500,
                 'msg' => 'server internal error',
@@ -109,6 +111,8 @@ if (!env('APP_DEBUG', false)) {
                     'file'    => $error->getFile(),
                     'line'    => $error->getLine(),
                 ]);
+
+            \App\Helpers\MailerHelper::sendErrorMail($error);
 
             return $response->withJson([
                 'code' => 500,
