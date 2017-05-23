@@ -18,7 +18,7 @@ if (!function_exists('env')) {
     {
         $value = getenv($key);
 
-        if ($value === false) {
+        if ($value === false || trim($value) == '') {
             return $default;
         }
 
