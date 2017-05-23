@@ -3,6 +3,8 @@ namespace App\Helpers;
 
 /**
 * 邮件辅助类
+* 基于：swiftmailer/swiftmailer
+* 文档：http://swiftmailer.org/docs/introduction.html
 */
 class MailerHelper
 {

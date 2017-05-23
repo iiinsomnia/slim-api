@@ -6,6 +6,8 @@ use Respect\Validation\Exceptions\NestedValidationException;
 
 /**
 * 验证辅助类
+* 基于：respect/validation
+* 文档：http://respect.github.io/Validation/
 */
 class ValidateHelper
 {
@@ -16,7 +18,7 @@ class ValidateHelper
         'email'       => '{{name}}不是合法的邮箱格式',
         'length'      => '{{name}}长度最大为{{maxValue}}',
         'between'     => '{{name}}须在{{minValue}}和{{maxValue}}之间',
-        'date'        => '{{name}}不是合法的日期格式，应为：{{format}}',
+        'date'        => '{{name}}不是合法的日期格式：{{format}}',
         'equals'      => '{{name}}必须和{{compareTo}}相同',
         'contains'    => '{{name}}必须包含{{containsValue}}',
         'regex'       => '{{name}}不符合输入规则：{{regex}}',
