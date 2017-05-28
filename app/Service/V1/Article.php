@@ -6,12 +6,34 @@ use App\Cache\ArticleCache;
 use App\Dao\MySQL\ArticleDao;
 use App\Service\Service;
 use Psr\Container\ContainerInterface;
+use Respect\Validation\Validator as v;
 
 class Article extends Service
 {
     function __construct(ContainerInterface $c)
     {
         parent::__construct($c);
+    }
+
+    public function rules()
+    {
+        return [
+            'title' => [
+                'label'    => '标题',
+                'required' => true,
+            ],
+            'author_id' => [
+                'label'    => '作者ID',
+                'valids'   => [
+                    v::intVal(),
+                ],
+                'required' => true,
+            ],
+            'content' => [
+                'label'    => '内容',
+                'required' => true,
+            ],
+        ];
     }
 
     // 处理文章列表请求

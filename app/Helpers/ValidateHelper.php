@@ -30,17 +30,17 @@ class ValidateHelper
      * @param array $rules 验证规则
      *        [
      *           'id' => [
-     *               'alias' => 'ID',
+     *               'label' => 'ID',
      *               'valids' => [v::intVal()],
      *               'required' => true,
      *           ],
      *           'name' => [
-     *               'alias' => '名称',
+     *               'label' => '名称',
      *               'valids' => [v::length(null, 20)],
      *               'required' => true,
      *           ],
      *           'email' => [
-     *               'alias' => '邮箱',
+     *               'label' => '邮箱',
      *               'valids' => [v::email()],
      *               'required' => false,
      *           ],
@@ -56,7 +56,7 @@ class ValidateHelper
                 $input = isset($data[$k]) ? $data[$k] : '';
 
                 if (isset($r['required']) && $r['required']) {
-                    v::notOptional()->setName($r['alias'])->assert($input);
+                    v::notOptional()->setName($r['label'])->assert($input);
                 } else {
                     if (!v::notOptional()->validate($input)) {
                         continue;
@@ -67,7 +67,7 @@ class ValidateHelper
 
                 if (!empty($valids)) {
                     foreach ($valids as $v) {
-                        $v->setName($r['alias'])->assert($input);
+                        $v->setName($r['label'])->assert($input);
                     }
                 }
             } catch (NestedValidationException $e) {

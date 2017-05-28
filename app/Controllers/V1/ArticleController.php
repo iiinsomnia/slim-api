@@ -2,6 +2,7 @@
 namespace App\Controllers\V1;
 
 use App\Controllers\Controller;
+use App\Helpers\ValidateHelper;
 use App\Service\V1\Article;
 use Psr\Container\ContainerInterface;
 
@@ -31,6 +32,15 @@ class ArticleController extends Controller
     public function actionAdd($request, $response, $args)
     {
         $postData = $request->getParsedBody();
+
+        $errors = ValidateHelper::validate($postData, $this->container->ArticleV1->rules());
+
+        if (!empty($errors)) {
+            $this->code = -1;
+            $this->msg = implode(';', $errors);
+
+            return $this->json($response);;
+        }
 
         $this->container->ArticleV1->handleActionAdd($postData, $this->code, $this->msg, $this->data);
 

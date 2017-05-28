@@ -3,14 +3,14 @@
 $container = $app->getContainer();
 
 $container['AuthCache'] = function ($c) {
-    $dao = new \App\Cache\AuthCache($c);
+    $cache = new \App\Cache\AuthCache($c);
 
-    return $dao;
+    return $cache;
 };
 
 $container['ArticleCache'] = function ($c) {
-    $dao = new \App\Cache\ArticleCache($c);
+    $cache = new \App\Cache\ArticleCache($c);
 
-    return $dao;
+    return $cache;
 };
 ?>
