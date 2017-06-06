@@ -37,58 +37,58 @@ class Article extends Service
     }
 
     // 处理文章列表请求
-    public function handleActionList(&$resCode, &$resMsg, &$resData)
+    public function handleActionList(&$code, &$msg, &$resp)
     {
         $dbData = $this->container->ArticleDao->getAll();
 
-        $resData = $dbData;
+        $resp = $dbData;
 
         return;
     }
 
     // 处理文章详情请求
-    public function handleActionDetail($id, &$resCode, &$resMsg, &$resData)
+    public function handleActionDetail($id, &$code, &$msg, &$resp)
     {
         $cacheData = $this->container->ArticleCache->getArticleById($id);
 
         if (!empty($cacheData)) {
-            $resData = $cacheData;
+            $resp = $cacheData;
             return;
         }
 
         $dbData = $this->container->ArticleDao->getById($id);
 
         if (empty($dbData)) {
-            $resData = null;
+            $resp = null;
             return;
         }
 
         $this->container->ArticleCache->setArticleById($id, $dbData);
 
-        $resData = $dbData;
+        $resp = $dbData;
 
         return;
     }
 
     // 处理文章添加请求
-    public function handleActionAdd($postData, &$resCode, &$resMsg, &$resData)
+    public function handleActionAdd($postData, &$code, &$msg, &$resp)
     {
         $id = $this->container->ArticleDao->addNew($postData);
 
         if (!$id) {
-            $resCode = -1;
-            $resMsg = 'failed';
+            $code = -1;
+            $msg = 'failed';
 
             return;
         }
 
-        $resData = $id;
+        $resp = $id;
 
         return;
     }
 
     // 处理文章编辑请求
-    public function handleActionUpdate($id, $putData, &$resCode, &$resMsg)
+    public function handleActionUpdate($id, $putData, &$code, &$msg)
     {
         // 删除文章缓存
         $this->container->ArticleCache->delArticleById($id);
@@ -96,15 +96,15 @@ class Article extends Service
         $result = $this->container->ArticleDao->updateById($id, $putData);
 
         if ($result === false) {
-            $resCode = -1;
-            $resMsg = 'failed';
+            $code = -1;
+            $msg = 'failed';
         }
 
         return;
     }
 
     // 处理文章删除请求
-    public function handleActionDelete($id, &$resCode, &$resMsg)
+    public function handleActionDelete($id, &$code, &$msg)
     {
         // 删除文章缓存
         $this->container->ArticleCache->delArticleById($id);
@@ -112,8 +112,8 @@ class Article extends Service
         $result = $this->container->ArticleDao->deleteById($id);
 
         if ($result === false) {
-            $resCode = -1;
-            $resMsg = 'failed';
+            $code = -1;
+            $msg = 'failed';
         }
 
         return;

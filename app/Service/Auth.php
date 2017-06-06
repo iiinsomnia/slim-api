@@ -1,8 +1,6 @@
 <?php
 namespace App\Service;
 
-use App\Cache\AuthCache;
-use App\Dao\MySQL\UserDao;
 use Psr\Container\ContainerInterface;
 
 class Auth
@@ -14,52 +12,45 @@ class Auth
         $this->container = $di;
     }
 
-    // 处理登录请求
-    public function handleActionLogin($uuid, $postData, &$resCode, &$resMsg, &$resData)
+    public function loginRules()
     {
-        if (!isset($postData['phone']) || trim($postData['phone']) == '') {
-            $resCode = -1;
-            $resMsg = "手机号不可为空";
+        return [
+            'phone' => [
+                'label'    => '手机号',
+                'required' => true,
+            ],
+            'password' => [
+                'label'    => '密码',
+                'required' => true,
+            ],
+        ];
+    }
+
+    // 处理登录请求
+    public function handleActionLogin($uuid, $input, &$code, &$msg, &$resp)
+    {
+        $dbData = $this->container->UserDao->getByPhone($input['phone']);
+
+        if (!$dbData) {
+            $code = -1;
+            $msg = "用户不存在";
 
             return;
         }
 
-        if (!isset($postData['password']) || trim($postData['password']) == '') {
-            $resCode = -1;
-            $resMsg = "密码不可为空";
-
-            return;
-        }
-
-        $userDbData = $this->container->UserDao->getByPhone($postData['phone']);
-
-        if (!$userDbData) {
-            $resCode = -1;
-            $resMsg = "用户不存在";
-
-            return;
-        }
-
-        if ($userDbData['status'] == 0) {
-            $resCode = -1;
-            $resMsg = "用户已失效";
-
-            return;
-        }
-
-        if ($userDbData['password'] != md5($postData['password'] . $userDbData['salt'])) {
-            $resCode = -1;
-            $resMsg = "密码不正确";
+        if (md5($input['password'] . $dbData['salt']) != $dbData['password']) {
+            $code = -1;
+            $msg = "密码不正确";
 
             return;
         }
 
         // 注销上一次登录信息
-        $this->container->AuthCache->delAuthDataByPhone($postData['phone']);
+        $this->container->AuthCache->logoutByPhone($input['phone']);
 
-        $token = $this->signin($uuid, $userDbData);
+        $token = $this->signIn($uuid, $dbData);
 
-        $resData = ['token' => $token];
+        $resp = ['token' => $token];
 
         return;
     }
@@ -67,34 +58,24 @@ class Auth
     // 处理退出请求
     public function handleActionLogout($uuid)
     {
-        $this->container->AuthCache->delAuthDataByUuid($uuid);
+        $this->container->AuthCache->logoutByUUID($uuid);
 
         return;
     }
 
     // 用户登录并返回唯一token
-    protected function signin($uuid, $userDbData)
+    protected function signIn($uuid, $data, $duration = 0)
     {
-        $now = time();
+        $loginIP = $_SERVER['REMOTE_ADDR'];
+        $loginTime = date('Y-m-d H:i:s');
 
-        $token = md5($userDbData['id'] . $userDbData['phone'] . $now);
+        $token = md5($data['id'] . $data['phone'] . $loginIP . $loginTime);
 
-        $expireTime = 0;
-        $sessionExpire = env('SESSION_EXPIRE', 0);
+        $data['last_login_ip'] = $loginIP;
+        $data['last_login_time'] = $loginTime;
+        $data['duration'] = $duration;
 
-        if (is_numeric($sessionExpire) && $sessionExpire > 0) {
-            $expireTime = $now + intval($sessionExpire);
-        }
-
-        $cacheData = [
-            'user_id'     => intval($userDbData['id']),
-            'user_name'   => $userDbData['name'],
-            'user_phone'  => $userDbData['phone'],
-            'login_time'  => $now,
-            'expire_time' => $expireTime,
-        ];
-
-        $this->container->AuthCache->setAuthData($userDbData['phone'], $uuid, $token, $cacheData);
+        $this->container->AuthCache->setAuthData($data['phone'], $uuid, $token, $data);
 
         return $token;
     }

@@ -11,10 +11,10 @@ class User extends Service
         parent::__construct($c);
     }
 
-    public function handleActionView($uuid, &$resCode, &$resMsg, &$resData)
+    public function handleActionView($uuid, &$code, &$msg, &$resp)
     {
         $userInfo = $this->getUserInfo($uuid);
-        $resData = $userInfo;
+        $resp = $userInfo;
 
         return;
     }

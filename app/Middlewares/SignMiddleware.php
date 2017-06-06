@@ -3,7 +3,7 @@ namespace App\Middlewares;
 
 use Psr\Container\ContainerInterface;
 
-class AuthMiddleware
+class SignMiddleware
 {
     protected $code = 0;
     protected $msg = 'success';
@@ -25,17 +25,22 @@ class AuthMiddleware
      */
     public function __invoke($request, $response, $next)
     {
+        $accessSign = $request->getHeader('Access-Sign');
+        $accessTime = $request->getHeader('Access-Time');
         $uuid = $request->getHeader('Access-UUID');
 
-        if (empty($uuid)) {
+        if (empty($accessSign) || empty($accessTime) || empty($uuid)) {
             return $response->withJson([
                 'code' => 403,
                 'msg'  => 'invalid token, access failed!',
             ], 200);
         }
 
-        // 登录验证
-        $success = $this->auth($uuid[0]);
+        // 验签
+        $path = $request->getUri()->getPath();
+        $query = $request->getQueryParams();
+
+        $success = $this->auth($uuid[0], $accessTime[0], $accessSign[0], $path, $query);
 
         if (!$success) {
             return $response->withJson([
@@ -49,29 +54,33 @@ class AuthMiddleware
         return $response;
     }
 
-    // 验证登录
-    protected function auth($uuid)
+    // 验签
+    protected function auth($uuid, $accessTime, $accessSign, $path, $query)
     {
-        $loginInfo = $this->container->AuthCache->getLoginData($uuid);
+        $duration = env('ACCESS_DURATION', 0);
 
-        if (empty($loginInfo)) {
-            $this->code = 401;
-            $this->msg = '用户未登录';
-
-            return false;
-        }
-
-        if ($loginInfo['duration'] != 0) {
-            $duration = time() - strtotime($loginInfo['last_login_time']);
-
-            if ($duration >= $loginInfo['duration']) {
-                $this->container->AuthCache->logoutByUUID($uuid);
-
-                $this->code = 401;
-                $this->msg = '登录已过期';
+        if (is_numeric($duration) && $duration != 0) {
+            if (time() - intval($accessTime) >= $duration) {
+                $this->code = -1;
+                $this->msg = '请求已失效';
 
                 return false;
             }
+        }
+
+        $token = $this->container->AuthCache->getLoginToken($uuid);
+
+        array_shift($query);
+        $query['token'] = $token;
+        $query['timestamp'] = $accessTime;
+
+        $signUrl = sprintf("%s?%s", $path, http_build_query($query));
+
+        if (strtolower($accessSign) != md5($signUrl)) {
+            $this->code = -1;
+            $this->msg = '验签失败';
+
+            return false;
         }
 
         return true;

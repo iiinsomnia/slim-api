@@ -16,23 +16,23 @@ class BookController extends Controller
     public function actionList($request, $response, $args)
     {
         // $query = $request->getQueryParams();
-        $this->container->BookV1->handleActionList($this->code, $this->msg, $this->data);
+        $this->container->BookV1->handleActionList($this->code, $this->msg, $this->resp);
 
         return $this->json($response);
     }
 
     public function actionDetail($request, $response, $args)
     {
-        $this->container->BookV1->handleActionDetail($args['id'], $this->code, $this->msg, $this->data);
+        $this->container->BookV1->handleActionDetail($args['id'], $this->code, $this->msg, $this->resp);
 
         return $this->json($response);
     }
 
     public function actionAdd($request, $response, $args)
     {
-        $postData = $request->getParsedBody();
+        $input = $request->getParsedBody();
 
-        $this->container->BookV1->handleActionAdd($postData, $this->code, $this->msg, $this->data);
+        $this->container->BookV1->handleActionAdd($input, $this->code, $this->msg, $this->resp);
 
         return $this->json($response);
     }

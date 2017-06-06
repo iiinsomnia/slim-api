@@ -14,68 +14,68 @@ class Book extends Service
     }
 
     // 处理书籍列表请求
-    public function handleActionList(&$resCode, &$resMsg, &$resData)
+    public function handleActionList(&$code, &$msg, &$resp)
     {
         $dbData = $this->container->BookDao->getAll();
 
-        $resData = $dbData;
+        $resp = $dbData;
 
         return;
     }
 
     // 处理书籍详情请求
-    public function handleActionDetail($id, &$resCode, &$resMsg, &$resData)
+    public function handleActionDetail($id, &$code, &$msg, &$resp)
     {
         $dbData = $this->container->BookDao->getById(['_id' => intval($id)]);
 
         if (!$dbData) {
-            $resData = [];
+            $resp = [];
             return;
         }
 
-        $resData = $dbData;
+        $resp = $dbData;
 
         return;
     }
 
     // 处理书籍添加请求
-    public function handleActionAdd($postData, &$resCode, &$resMsg, &$resData)
+    public function handleActionAdd($postData, &$code, &$msg, &$resp)
     {
         $id = $this->container->BookDao->addNew($postData);
 
         if (!$id) {
-            $resCode = -1;
-            $resMsg = 'failed';
+            $code = -1;
+            $msg = 'failed';
 
             return;
         }
 
-        $resData = $id;
+        $resp = $id;
 
         return;
     }
 
     // 处理书籍编辑请求
-    public function handleActionUpdate($id, $putData, &$resCode, &$resMsg)
+    public function handleActionUpdate($id, $putData, &$code, &$msg)
     {
-        $result = $this->container->BookDao->updateById(['_id' => intval($id)], $resData);
+        $result = $this->container->BookDao->updateById(['_id' => intval($id)], $resp);
 
         if (!$result) {
-            $resCode = -1;
-            $resMsg = 'failed';
+            $code = -1;
+            $msg = 'failed';
         }
 
         return;
     }
 
     // 处理书籍删除请求
-    public function handleActionDelete($id, &$resCode, &$resMsg)
+    public function handleActionDelete($id, &$code, &$msg)
     {
         $result = $this->container->BookDao->deleteById(['_id' => intval($id)]);
 
         if (!$result) {
-            $resCode = -1;
-            $resMsg = 'failed';
+            $code = -1;
+            $msg = 'failed';
         }
 
         return;

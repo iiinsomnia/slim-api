@@ -17,23 +17,23 @@ class ArticleController extends Controller
     public function actionList($request, $response, $args)
     {
         // $query = $request->getQueryParams();
-        $this->container->ArticleV1->handleActionList($this->code, $this->msg, $this->data);
+        $this->container->ArticleV1->handleActionList($this->code, $this->msg, $this->resp);
 
         return $this->json($response);
     }
 
     public function actionDetail($request, $response, $args)
     {
-        $this->container->ArticleV1->handleActionDetail($args['id'], $this->code, $this->msg, $this->data);
+        $this->container->ArticleV1->handleActionDetail($args['id'], $this->code, $this->msg, $this->resp);
 
         return $this->json($response);
     }
 
     public function actionAdd($request, $response, $args)
     {
-        $postData = $request->getParsedBody();
+        $input = $request->getParsedBody();
 
-        $errors = ValidateHelper::validate($postData, $this->container->ArticleV1->rules());
+        $errors = ValidateHelper::validate($input, $this->container->ArticleV1->rules());
 
         if (!empty($errors)) {
             $this->code = -1;
@@ -42,7 +42,7 @@ class ArticleController extends Controller
             return $this->json($response);;
         }
 
-        $this->container->ArticleV1->handleActionAdd($postData, $this->code, $this->msg, $this->data);
+        $this->container->ArticleV1->handleActionAdd($input, $this->code, $this->msg, $this->resp);
 
         return $this->json($response);
     }

@@ -17,7 +17,7 @@ class AuthCache
     }
 
     // 设置登录验证用户信息缓存，token相当于sessionID
-    public function setAuthData($phone, $uuid, $token, $data)
+    public function setLoginData($phone, $uuid, $token, $data)
     {
         $this->_redis->hset($this->_cacheDeviceKey, $phone, $uuid);
         $this->_redis->hset($this->_cacheCookieKey, $uuid, $token);
@@ -27,7 +27,7 @@ class AuthCache
     }
 
     // 获取登录验证后的用户信息
-    public function getAuthData($uuid)
+    public function getLoginData($uuid)
     {
         $token = $this->_redis->hget($this->_cacheCookieKey, $uuid);
 
@@ -47,7 +47,7 @@ class AuthCache
     }
 
     // 获取用户登录的唯一token
-    public function getAuthToken($uuid)
+    public function getLoginToken($uuid)
     {
         $token = $this->_redis->hget($this->_cacheCookieKey, $uuid);
 
@@ -55,7 +55,7 @@ class AuthCache
     }
 
     // 用于注销上一台设备登录验证的信息
-    public function delAuthDataByPhone($phone)
+    public function logoutByPhone($phone)
     {
         $uuid = $this->_redis->hget($this->_cacheDeviceKey, $phone);
         $token = $this->_redis->hget($this->_cacheCookieKey, $uuid);
@@ -67,7 +67,7 @@ class AuthCache
     }
 
     // 用于注销本次登录验证信息
-    public function delAuthDataByUuid($uuid)
+    public function logoutByUUID($uuid)
     {
         $token = $this->_redis->hget($this->_cacheCookieKey, $uuid);
 

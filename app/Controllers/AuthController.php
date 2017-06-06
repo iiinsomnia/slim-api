@@ -1,6 +1,7 @@
 <?php
 namespace App\Controllers;
 
+use App\Helpers\ValidateHelper;
 use App\Service\Auth;
 use Psr\Container\ContainerInterface;
 
@@ -15,9 +16,18 @@ class AuthController extends Controller
     public function actionLogin($request, $response, $args)
     {
         $uuid = $request->getHeader('Access-UUID');
-        $postData = $request->getParsedBody();
+        $input = $request->getParsedBody();
 
-        $this->container->Auth->handleActionLogin($uuid[0], $postData, $this->code, $this->msg, $this->data);
+        $errors = ValidateHelper::validate($input, $this->container->Auth->loginRules());
+
+        if (!empty($errors)) {
+            $this->code = -1;
+            $this->msg = implode(';', $errors);
+
+            return $this->json($response);;
+        }
+
+        $this->container->Auth->handleActionLogin($uuid[0], $input, $this->code, $this->msg, $this->data);
 
         return $this->json($response);
     }

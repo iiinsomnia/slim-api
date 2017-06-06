@@ -5,17 +5,13 @@ use Psr\Container\ContainerInterface;
 
 class Controller
 {
-    protected $code;
-    protected $msg;
-    protected $data;
+    protected $code = 0;
+    protected $msg = 'success';
+    protected $resp = [];
 
     protected $container;
 
     function __construct(ContainerInterface $c) {
-        $this->code = 0;
-        $this->msg = 'success';
-        $this->data = false;
-
         $this->container = $c;
     }
 
@@ -23,11 +19,8 @@ class Controller
         $result = [
             'code' => $this->code,
             'msg'  => $this->msg,
+            'data' => $this->resp,
         ];
-
-        if ($this->data !== false) {
-            $result['data'] = $this->data;
-        }
 
         return $response->withJson($result, 200);
     }

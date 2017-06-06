@@ -94,7 +94,9 @@ if (!env('APP_DEBUG', false)) {
                     'line'    => $error->getLine(),
                 ]);
 
-            \App\Helpers\MailerHelper::sendErrorMail($error);
+            if (env('ERROR_MAIL', false)) {
+                \App\Helpers\MailerHelper::sendErrorMail($error);
+            }
 
             return $response->withJson([
                 'code' => 500,
@@ -112,7 +114,9 @@ if (!env('APP_DEBUG', false)) {
                     'line'    => $error->getLine(),
                 ]);
 
-            \App\Helpers\MailerHelper::sendErrorMail($error);
+            if (env('ERROR_MAIL', false)) {
+                \App\Helpers\MailerHelper::sendErrorMail($error);
+            }
 
             return $response->withJson([
                 'code' => 500,

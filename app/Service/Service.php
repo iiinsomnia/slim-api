@@ -6,33 +6,28 @@ use Psr\Container\ContainerInterface;
 
 class Service
 {
+    private $_userID = 0;
+    private $_userInfo = [];
+
     protected $container;
 
     function __construct(ContainerInterface $c)
     {
+        $this->_initUserInfo();
+
         $this->container = $c;
     }
 
-    protected function getUserId($uuid)
+    private function _initUserInfo($uuid)
     {
         $loginInfo = $this->container->AuthCache->getAuthData($uuid);
 
-        if (empty($loginInfo)) {
-            return 0;
+        if (!empty($loginInfo)) {
+            $this->_userID = $loginInfo['id'];
+            $this->_userInfo = $loginInfo;
         }
 
-        return $loginInfo['user_id'];
-    }
-
-    protected function getUserInfo($uuid)
-    {
-        $loginInfo = $this->container->AuthCache->getAuthData($uuid);
-
-        if (empty($loginInfo)) {
-            return [];
-        }
-
-        return $loginInfo;
+        return;
     }
 }
 ?>
