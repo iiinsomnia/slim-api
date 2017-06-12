@@ -6,10 +6,12 @@ use Psr\Container\ContainerInterface;
 class Auth
 {
     protected $container;
+    protected $uuid;
 
-    function __construct(ContainerInterface $di)
+    function __construct(ContainerInterface $c, $uuid)
     {
-        $this->container = $di;
+        $this->container = $c;
+        $this->uuid = $uuid;
     }
 
     public function loginRules()
@@ -27,7 +29,7 @@ class Auth
     }
 
     // 处理登录请求
-    public function handleActionLogin($uuid, $input, &$code, &$msg, &$resp)
+    public function handleLogin($input, &$code, &$msg, &$resp)
     {
         $dbData = $this->container->UserDao->getByPhone($input['phone']);
 
@@ -48,7 +50,7 @@ class Auth
         // 注销上一次登录信息
         $this->container->AuthCache->logoutByPhone($input['phone']);
 
-        $token = $this->signIn($uuid, $dbData);
+        $token = $this->signIn($this->uuid, $dbData);
 
         $resp = ['token' => $token];
 
@@ -56,15 +58,15 @@ class Auth
     }
 
     // 处理退出请求
-    public function handleActionLogout($uuid)
+    public function handleLogout()
     {
-        $this->container->AuthCache->logoutByUUID($uuid);
+        $this->container->AuthCache->logoutByUUID($this->uuid);
 
         return;
     }
 
     // 用户登录并返回唯一token
-    protected function signIn($uuid, $data, $duration = 0)
+    protected function signIn($data, $duration = 0)
     {
         $loginIP = $_SERVER['REMOTE_ADDR'];
         $loginTime = date('Y-m-d H:i:s');
@@ -75,7 +77,7 @@ class Auth
         $data['last_login_time'] = $loginTime;
         $data['duration'] = $duration;
 
-        $this->container->AuthCache->setAuthData($data['phone'], $uuid, $token, $data);
+        $this->container->AuthCache->setAuthData($data['phone'], $this->uuid, $token, $data);
 
         return $token;
     }

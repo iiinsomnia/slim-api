@@ -13,42 +13,42 @@ class BookController extends Controller
         parent::__construct($c);
     }
 
-    public function actionList($request, $response, $args)
+    public function list($request, $response, $args)
     {
         // $query = $request->getQueryParams();
-        $this->container->BookV1->handleActionList($this->code, $this->msg, $this->resp);
+        $this->container->BookV1->handleList($this->code, $this->msg, $this->resp);
 
         return $this->json($response);
     }
 
-    public function actionDetail($request, $response, $args)
+    public function detail($request, $response, $args)
     {
-        $this->container->BookV1->handleActionDetail($args['id'], $this->code, $this->msg, $this->resp);
+        $this->container->BookV1->handleDetail($args['id'], $this->code, $this->msg, $this->resp);
 
         return $this->json($response);
     }
 
-    public function actionAdd($request, $response, $args)
+    public function add($request, $response, $args)
     {
         $input = $request->getParsedBody();
 
-        $this->container->BookV1->handleActionAdd($input, $this->code, $this->msg, $this->resp);
+        $this->container->BookV1->handleAdd($input, $this->code, $this->msg, $this->resp);
 
         return $this->json($response);
     }
 
-    public function actionUpdate($request, $response, $args)
+    public function update($request, $response, $args)
     {
         $putData = $request->getParsedBody();
 
-        $this->container->BookV1->handleActionUpdate($args['id'], $putData, $this->code, $this->msg);
+        $this->container->BookV1->handleUpdate($args['id'], $putData, $this->code, $this->msg);
 
         return $this->json($response);
     }
 
-    public function actionDelete($request, $response, $args)
+    public function delete($request, $response, $args)
     {
-        $this->container->BookV1->handleActionDelete($args['id'], $this->code, $this->msg);
+        $this->container->BookV1->handleDelete($args['id'], $this->code, $this->msg);
 
         return $this->json($response);
     }

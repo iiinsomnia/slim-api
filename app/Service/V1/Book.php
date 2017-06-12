@@ -1,20 +1,18 @@
 <?php
-
 namespace App\Service\V1;
 
-use App\Dao\Mongo\BookDao;
 use App\Service\Service;
 use Psr\Container\ContainerInterface;
 
 class Book extends Service
 {
-    function __construct(ContainerInterface $c)
+    function __construct(ContainerInterface $c, $uuid)
     {
-        parent::__construct($c);
+        parent::__construct($c, $uuid);
     }
 
     // 处理书籍列表请求
-    public function handleActionList(&$code, &$msg, &$resp)
+    public function handleList(&$code, &$msg, &$resp)
     {
         $dbData = $this->container->BookDao->getAll();
 
@@ -24,7 +22,7 @@ class Book extends Service
     }
 
     // 处理书籍详情请求
-    public function handleActionDetail($id, &$code, &$msg, &$resp)
+    public function handleDetail($id, &$code, &$msg, &$resp)
     {
         $dbData = $this->container->BookDao->getById(['_id' => intval($id)]);
 
@@ -39,9 +37,9 @@ class Book extends Service
     }
 
     // 处理书籍添加请求
-    public function handleActionAdd($postData, &$code, &$msg, &$resp)
+    public function handleAdd($postData, &$code, &$msg, &$resp)
     {
-        $id = $this->container->BookDao->addNew($postData);
+        $id = $this->container->BookDao->addNewRecord($postData);
 
         if (!$id) {
             $code = -1;
@@ -56,7 +54,7 @@ class Book extends Service
     }
 
     // 处理书籍编辑请求
-    public function handleActionUpdate($id, $putData, &$code, &$msg)
+    public function handleUpdate($id, $putData, &$code, &$msg)
     {
         $result = $this->container->BookDao->updateById(['_id' => intval($id)], $resp);
 
@@ -69,7 +67,7 @@ class Book extends Service
     }
 
     // 处理书籍删除请求
-    public function handleActionDelete($id, &$code, &$msg)
+    public function handleDelete($id, &$code, &$msg)
     {
         $result = $this->container->BookDao->deleteById(['_id' => intval($id)]);
 

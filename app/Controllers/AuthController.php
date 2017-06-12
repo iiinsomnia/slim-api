@@ -13,9 +13,8 @@ class AuthController extends Controller
         parent::__construct($c);
     }
 
-    public function actionLogin($request, $response, $args)
+    public function login($request, $response, $args)
     {
-        $uuid = $request->getHeader('Access-UUID');
         $input = $request->getParsedBody();
 
         $errors = ValidateHelper::validate($input, $this->container->Auth->loginRules());
@@ -27,16 +26,14 @@ class AuthController extends Controller
             return $this->json($response);;
         }
 
-        $this->container->Auth->handleActionLogin($uuid[0], $input, $this->code, $this->msg, $this->data);
+        $this->container->Auth->handleLogin($input, $this->code, $this->msg, $this->data);
 
         return $this->json($response);
     }
 
-    public function actionLogout($request, $response, $args)
+    public function logout($request, $response, $args)
     {
-        $uuid = $request->getHeader('Access-UUID');
-
-        $this->container->Auth->handleActionLogout($uuid[0]);
+        $this->container->Auth->handleLogout();
 
         return $this->json($response);
     }

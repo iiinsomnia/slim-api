@@ -29,7 +29,7 @@ class ArticleDao extends MySQL
         return $data;
     }
 
-    public function addNew($data)
+    public function addNewRecord($data)
     {
         $result = $this->insert($data);
 

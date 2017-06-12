@@ -33,7 +33,7 @@ class BookDao extends Mongo
         return $data;
     }
 
-    public function addNew($data)
+    public function addNewRecord($data)
     {
         $result = $this->insert($data);
 

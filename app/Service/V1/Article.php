@@ -1,18 +1,15 @@
 <?php
-
 namespace App\Service\V1;
 
-use App\Cache\ArticleCache;
-use App\Dao\MySQL\ArticleDao;
 use App\Service\Service;
 use Psr\Container\ContainerInterface;
 use Respect\Validation\Validator as v;
 
 class Article extends Service
 {
-    function __construct(ContainerInterface $c)
+    function __construct(ContainerInterface $c, $uuid)
     {
-        parent::__construct($c);
+        parent::__construct($c, $uuid);
     }
 
     public function rules()
@@ -37,7 +34,7 @@ class Article extends Service
     }
 
     // 处理文章列表请求
-    public function handleActionList(&$code, &$msg, &$resp)
+    public function handleList(&$code, &$msg, &$resp)
     {
         $dbData = $this->container->ArticleDao->getAll();
 
@@ -47,7 +44,7 @@ class Article extends Service
     }
 
     // 处理文章详情请求
-    public function handleActionDetail($id, &$code, &$msg, &$resp)
+    public function handleDetail($id, &$code, &$msg, &$resp)
     {
         $cacheData = $this->container->ArticleCache->getArticleById($id);
 
@@ -71,9 +68,9 @@ class Article extends Service
     }
 
     // 处理文章添加请求
-    public function handleActionAdd($postData, &$code, &$msg, &$resp)
+    public function handleAdd($postData, &$code, &$msg, &$resp)
     {
-        $id = $this->container->ArticleDao->addNew($postData);
+        $id = $this->container->ArticleDao->addNewRecord($postData);
 
         if (!$id) {
             $code = -1;
@@ -88,7 +85,7 @@ class Article extends Service
     }
 
     // 处理文章编辑请求
-    public function handleActionUpdate($id, $putData, &$code, &$msg)
+    public function handleUpdate($id, $putData, &$code, &$msg)
     {
         // 删除文章缓存
         $this->container->ArticleCache->delArticleById($id);
@@ -104,7 +101,7 @@ class Article extends Service
     }
 
     // 处理文章删除请求
-    public function handleActionDelete($id, &$code, &$msg)
+    public function handleDelete($id, &$code, &$msg)
     {
         // 删除文章缓存
         $this->container->ArticleCache->delArticleById($id);

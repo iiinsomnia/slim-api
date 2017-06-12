@@ -1,30 +1,31 @@
 <?php
 namespace App\Service;
 
-use App\Cache\AuthCache;
 use Psr\Container\ContainerInterface;
 
 class Service
 {
-    private $_userID = 0;
-    private $_userInfo = [];
+    protected $uid = 0;
+    protected $user = [];
 
     protected $container;
+    protected $uuid;
 
-    function __construct(ContainerInterface $c)
+    function __construct(ContainerInterface $c, $uuid)
     {
-        $this->_initUserInfo();
+        $this->_initUserInfo($c, $uuid);
 
         $this->container = $c;
+        $this->uuid = $uuid;
     }
 
-    private function _initUserInfo($uuid)
+    private function _initUserInfo($container, $uuid)
     {
-        $loginInfo = $this->container->AuthCache->getAuthData($uuid);
+        $loginInfo = $container->AuthCache->getLoginData($uuid);
 
         if (!empty($loginInfo)) {
-            $this->_userID = $loginInfo['id'];
-            $this->_userInfo = $loginInfo;
+            $this->uid = $loginInfo['id'];
+            $this->user = $loginInfo;
         }
 
         return;

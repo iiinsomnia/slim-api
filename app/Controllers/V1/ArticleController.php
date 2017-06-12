@@ -14,22 +14,22 @@ class ArticleController extends Controller
         parent::__construct($c);
     }
 
-    public function actionList($request, $response, $args)
+    public function list($request, $response, $args)
     {
         // $query = $request->getQueryParams();
-        $this->container->ArticleV1->handleActionList($this->code, $this->msg, $this->resp);
+        $this->container->ArticleV1->handleList($this->code, $this->msg, $this->resp);
 
         return $this->json($response);
     }
 
-    public function actionDetail($request, $response, $args)
+    public function detail($request, $response, $args)
     {
-        $this->container->ArticleV1->handleActionDetail($args['id'], $this->code, $this->msg, $this->resp);
+        $this->container->ArticleV1->handleDetail($args['id'], $this->code, $this->msg, $this->resp);
 
         return $this->json($response);
     }
 
-    public function actionAdd($request, $response, $args)
+    public function add($request, $response, $args)
     {
         $input = $request->getParsedBody();
 
@@ -42,23 +42,23 @@ class ArticleController extends Controller
             return $this->json($response);;
         }
 
-        $this->container->ArticleV1->handleActionAdd($input, $this->code, $this->msg, $this->resp);
+        $this->container->ArticleV1->handleAdd($input, $this->code, $this->msg, $this->resp);
 
         return $this->json($response);
     }
 
-    public function actionUpdate($request, $response, $args)
+    public function update($request, $response, $args)
     {
         $putData = $request->getParsedBody();
 
-        $this->container->ArticleV1->handleActionUpdate($args['id'], $putData, $this->code, $this->msg);
+        $this->container->ArticleV1->handleUpdate($args['id'], $putData, $this->code, $this->msg);
 
         return $this->json($response);
     }
 
-    public function actionDelete($request, $response, $args)
+    public function delete($request, $response, $args)
     {
-        $this->container->ArticleV1->handleActionDelete($args['id'], $this->code, $this->msg);
+        $this->container->ArticleV1->handleDelete($args['id'], $this->code, $this->msg);
 
         return $this->json($response);
     }

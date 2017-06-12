@@ -6,17 +6,9 @@ use Psr\Container\ContainerInterface;
 
 class User extends Service
 {
-    function __construct(ContainerInterface $c)
+    function __construct(ContainerInterface $c, $uuid)
     {
-        parent::__construct($c);
-    }
-
-    public function handleActionView($uuid, &$code, &$msg, &$resp)
-    {
-        $userInfo = $this->getUserInfo($uuid);
-        $resp = $userInfo;
-
-        return;
+        parent::__construct($c, $uuid);
     }
 }
 ?>
