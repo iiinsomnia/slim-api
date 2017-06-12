@@ -1,6 +1,6 @@
 # slim-api
 
-SlimFramework整合Laravel/Database、MongoDB、Predis，用于API开发，支持CLI-Command
+SlimFramework集成Laravel/Database、MongoDB、Predis，用于API开发，支持CLI-Command
 
 支持邮件推送运行时错误
 
