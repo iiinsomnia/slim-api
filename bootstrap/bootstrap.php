@@ -70,7 +70,7 @@ if (!env('APP_DEBUG', false)) {
         return function ($request, $response) use ($c) {
             return $response->withJson([
                 'code' => 404,
-                'msg' => 'page not found',
+                'msg'  => 'page not found',
             ], 200);
         };
     };
@@ -80,7 +80,7 @@ if (!env('APP_DEBUG', false)) {
         return function ($request, $response, $methods) use ($c) {
             return $response->withJson([
                 'code' => 405,
-                'msg' => 'method not allowed',
+                'msg'  => 'method not allowed',
             ], 200);
         };
     };
@@ -100,7 +100,7 @@ if (!env('APP_DEBUG', false)) {
 
             return $response->withJson([
                 'code' => 500,
-                'msg' => 'server internal error',
+                'msg'  => 'server internal error',
             ], 200);
         };
     };
@@ -120,7 +120,7 @@ if (!env('APP_DEBUG', false)) {
 
             return $response->withJson([
                 'code' => 500,
-                'msg' => 'server internal error',
+                'msg'  => 'server internal error',
             ], 200);
         };
     };
