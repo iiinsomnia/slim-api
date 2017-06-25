@@ -31,26 +31,23 @@ class Auth
     // 处理登录请求
     public function handleLogin($input, &$code, &$msg, &$resp)
     {
-        $dbData = $this->container->UserDao->getByPhone($input['phone']);
+        $user = $this->container->UserDao->getByPhone($input['phone']);
 
-        if (!$dbData) {
+        if (!$user) {
             $code = -1;
             $msg = "用户不存在";
 
             return;
         }
 
-        if (md5($input['password'] . $dbData['salt']) != $dbData['password']) {
+        if (md5($input['password'] . $user['salt']) != $user['password']) {
             $code = -1;
             $msg = "密码不正确";
 
             return;
         }
 
-        // 注销上一次登录信息
-        $this->container->AuthCache->logoutByPhone($input['phone']);
-
-        $token = $this->signIn($this->uuid, $dbData);
+        $token = $this->signIn($this->uuid, $user);
 
         $resp = ['token' => $token];
 
@@ -68,6 +65,9 @@ class Auth
     // 用户登录并返回唯一token
     protected function signIn($data, $duration = 0)
     {
+        // 注销上一台设备登录信息
+        $this->container->AuthCache->logoutByPhone($data['phone']);
+
         $loginIP = $_SERVER['REMOTE_ADDR'];
         $loginTime = date('Y-m-d H:i:s');
 

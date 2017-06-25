@@ -22,9 +22,9 @@ class MySQL
      * constructor receives container instance
      * @param ContainerInterface $di container instance
      * @param string $table 表名称
-     * @param string $db 数据库配置名称，默认：db
+     * @param string $db 数据库配置名称，默认：mysql
      */
-    public function __construct(ContainerInterface $c, $table, $db = 'db')
+    public function __construct(ContainerInterface $c, $table, $db = 'mysql')
     {
         $this->_db = $c->get($db);
         $this->_table = $table;
@@ -48,7 +48,10 @@ class MySQL
             return $id;
         } catch (QueryException $e) {
             $logger = $this->container->logger->error(sprintf("[MySQL] Insert Error: %s", $e->getMessage()));
-            MailerHelper::sendErrorMail($e);
+
+            if (env('ERROR_MAIL', false)) {
+                MailerHelper::sendErrorMail($e);
+            }
 
             return false;
         }
@@ -67,7 +70,10 @@ class MySQL
             return $success;
         } catch (QueryException $e) {
             $logger = $this->container->logger->error(sprintf("[MySQL] BatchInsert Error: %s", $e->getMessage()));
-            MailerHelper::sendErrorMail($e);
+
+            if (env('ERROR_MAIL', false)) {
+                MailerHelper::sendErrorMail($e);
+            }
 
             return false;
         }
@@ -93,7 +99,10 @@ class MySQL
             return $affectRows;
         } catch (QueryException $e) {
             $logger = $this->container->logger->error(sprintf("[MySQL] Update Error: %s", $e->getMessage()));
-            MailerHelper::sendErrorMail($e);
+
+            if (env('ERROR_MAIL', false)) {
+                MailerHelper::sendErrorMail($e);
+            }
 
             return false;
         }
@@ -201,7 +210,10 @@ class MySQL
             return $affectRows;
         } catch (QueryException $e) {
             $logger = $this->container->logger->error(sprintf("BatchInsert Error: %s", $e->getMessage()));
-            MailerHelper::sendErrorMail($e);
+
+            if (env('ERROR_MAIL', false)) {
+                MailerHelper::sendErrorMail($e);
+            }
 
             return false;
         }
@@ -266,7 +278,10 @@ class MySQL
             $this->_db::rollback();
 
             $logger = $this->container->logger->error(sprintf("[MySQL] DoTransaction Error: %s", $e->getMessage()));
-            MailerHelper::sendErrorMail($e);
+
+            if (env('ERROR_MAIL', false)) {
+                MailerHelper::sendErrorMail($e);
+            }
 
             return false;
         }

@@ -23,5 +23,5 @@ $app->group('/v1', function () {
     $this->post('/books', '\App\Controllers\V1\BookController:add')->setName('book.add');
     $this->put('/books/{id}', '\App\Controllers\V1\BookController:update')->setName('book.update');
     $this->delete('/books/{id}', '\App\Controllers\V1\BookController:delete')->setName('book.delete');
-});//->add(\App\Middlewares\SignMiddleware::class)->add(\App\Middlewares\AuthMiddleware::class);
+})->add(\App\Middlewares\SignMiddleware::class)->add(\App\Middlewares\AuthMiddleware::class);
 ?>
