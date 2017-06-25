@@ -7,7 +7,7 @@
 * 使用Laravel/Database、MongoDB、Predis
 * 支持CLI-Command，用于crontab
 * 支持.env环境配置
-* 全部操作均使用依赖注入
+* 使用依赖注入开发
 * 支持邮件推送系统错误日志
 * 内置登录和验签模块
 
@@ -36,7 +36,7 @@ php cli greet -h
 * 服务器虚拟目录指向 `public` 目录
 * 确保 `logs` 目录可写
 * 内置MySQL、Mongo、Redis使用示例
-* 签名规则：请求URL(不包括域名) + 用户登录token + 请求时间戳，取md5值
+* 默认签名规则：请求URL(不包括域名) + 用户登录token + 请求时间戳，取md5值
 
 ### 参考
 
