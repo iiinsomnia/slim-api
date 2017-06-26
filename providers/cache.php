@@ -8,8 +8,8 @@ $container['AuthCache'] = function($c) {
     return $cache;
 };
 
-$container['ArticleCache'] = function($c) {
-    $cache = new \App\Cache\ArticleCache($c);
+$container['BookCache'] = function($c) {
+    $cache = new \App\Cache\BookCache($c);
 
     return $cache;
 };
