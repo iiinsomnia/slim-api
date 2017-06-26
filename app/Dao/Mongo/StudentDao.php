@@ -4,11 +4,11 @@ namespace App\Dao\Mongo;
 use App\Dao\Mongo;
 use Psr\Container\ContainerInterface;
 
-class BookDao extends Mongo
+class StudentDao extends Mongo
 {
     // constructor receives container instance
     function __construct(ContainerInterface $c){
-        parent::__construct($c, 'book');
+        parent::__construct($c, 'student');
     }
 
     public function getAll()
@@ -25,10 +25,10 @@ class BookDao extends Mongo
         return $data;
     }
 
-    public function getByTitle($title)
+    public function getByName($name)
     {
-        $regex = new \MongoDB\BSON\Regex(sprintf(".*%s.*", $title));
-        $data = $this->find(['title' => $regex]);
+        $regex = new \MongoDB\BSON\Regex(sprintf(".*%s.*", $name));
+        $data = $this->find(['name' => $regex]);
 
         return $data;
     }

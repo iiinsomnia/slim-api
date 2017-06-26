@@ -6,9 +6,9 @@ use Psr\Container\ContainerInterface;
 
 class User extends Service
 {
-    function __construct(ContainerInterface $c, $uuid)
+    function __construct(ContainerInterface $c)
     {
-        parent::__construct($c, $uuid);
+        parent::__construct($c);
     }
 }
 ?>

@@ -8,10 +8,12 @@ class Auth
     protected $container;
     protected $uuid;
 
-    function __construct(ContainerInterface $c, $uuid)
+    function __construct(ContainerInterface $c)
     {
         $this->container = $c;
-        $this->uuid = $uuid;
+
+        $uuid = $c->request->getHeader('Access-UUID');
+        $this->uuid = $uuid[0];
     }
 
     public function loginRules()

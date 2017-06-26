@@ -2,6 +2,7 @@
 namespace App\Controllers\V1;
 
 use App\Controllers\Controller;
+use App\Helpers\ValidateHelper;
 use App\Service\V1\Book;
 use Psr\Container\ContainerInterface;
 
@@ -31,6 +32,15 @@ class BookController extends Controller
     public function add($request, $response, $args)
     {
         $input = $request->getParsedBody();
+
+        $errors = ValidateHelper::validate($input, $this->container->BookV1->rules());
+
+        if (!empty($errors)) {
+            $this->code = -1;
+            $this->msg = implode(';', $errors);
+
+            return $this->json($response);;
+        }
 
         $this->container->BookV1->handleAdd($input, $this->code, $this->msg, $this->resp);
 

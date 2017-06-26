@@ -9,14 +9,13 @@ class Service
     protected $user = [];
 
     protected $container;
-    protected $uuid;
 
-    function __construct(ContainerInterface $c, $uuid)
+    function __construct(ContainerInterface $c)
     {
-        $this->_initUserInfo($c, $uuid);
+        $uuid = $c->request->getHeader('Access-UUID');
+        $this->_initUserInfo($c, $uuid[0]);
 
         $this->container = $c;
-        $this->uuid = $uuid;
     }
 
     private function _initUserInfo($container, $uuid)

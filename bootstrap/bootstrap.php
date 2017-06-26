@@ -3,7 +3,7 @@
 $container = $app->getContainer();
 
 // Illuminate/database
-$container['mysql'] = function ($c) {
+$container['mysql'] = function($c) {
     $settings = $c->get('settings')['mysql'];
 
     $capsule = new \Illuminate\Database\Capsule\Manager;
@@ -25,7 +25,7 @@ $container['mysql'] = function ($c) {
 };
 
 // MongoDB
-$container['mongo'] = function ($c) {
+$container['mongo'] = function($c) {
     $settings = $c->get('settings')['mongo'];
 
     $dsn = sprintf('mongodb://%s:%s', $settings['host'], $settings['port']);
@@ -40,7 +40,7 @@ $container['mongo'] = function ($c) {
 };
 
 // Predis
-$container['redis'] = function ($c) {
+$container['redis'] = function($c) {
     $settings = $c->get('settings')['redis'];
 
     $client = new \Predis\Client([
@@ -55,7 +55,7 @@ $container['redis'] = function ($c) {
 };
 
 // Monolog
-$container['logger'] = function ($c) {
+$container['logger'] = function($c) {
     $settings = $c->get('settings')['logger'];
 
     $logger = new Monolog\Logger($settings['name']);
@@ -66,7 +66,7 @@ $container['logger'] = function ($c) {
 
 if (!env('APP_DEBUG', false)) {
     // 404NotFound
-    $container['notFoundHandler'] = function ($c) {
+    $container['notFoundHandler'] = function($c) {
         return function ($request, $response) use ($c) {
             return $response->withJson([
                 'code' => 404,
@@ -76,7 +76,7 @@ if (!env('APP_DEBUG', false)) {
     };
 
     // 405NotAllowed
-    $container['notAllowedHandler'] = function ($c) {
+    $container['notAllowedHandler'] = function($c) {
         return function ($request, $response, $methods) use ($c) {
             return $response->withJson([
                 'code' => 405,
@@ -86,7 +86,7 @@ if (!env('APP_DEBUG', false)) {
     };
 
     // ErrorHandler
-    $container['errorHandler'] = function ($c) {
+    $container['errorHandler'] = function($c) {
         return function ($request, $response, $error) use ($c) {
             $c['logger']->error(null, [
                     'message' => $error->getMessage(),
@@ -106,7 +106,7 @@ if (!env('APP_DEBUG', false)) {
     };
 
     // PHPErrorHandler
-    $container['phpErrorHandler'] = function ($c) {
+    $container['phpErrorHandler'] = function($c) {
         return function ($request, $response, $error) use ($c) {
             $c['logger']->error(null, [
                     'message' => $error->getMessage(),

@@ -4,12 +4,12 @@ namespace App\Dao\MySQL;
 use App\Dao\MySQL;
 use Psr\Container\ContainerInterface;
 
-class ArticleDao extends MySQL
+class BookDao extends MySQL
 {
     // constructor receives container instance
     public function __construct(ContainerInterface $c)
     {
-        parent::__construct($c, 'article');
+        parent::__construct($c, 'book');
     }
 
     public function getAll()
