@@ -67,7 +67,7 @@ $container['logger'] = function($c) {
 if (!env('APP_DEBUG', false)) {
     // 404NotFound
     $container['notFoundHandler'] = function($c) {
-        return function ($request, $response) use ($c) {
+        return function($request, $response) use ($c) {
             return $response->withJson([
                 'code' => 404,
                 'msg'  => 'page not found',
@@ -77,7 +77,7 @@ if (!env('APP_DEBUG', false)) {
 
     // 405NotAllowed
     $container['notAllowedHandler'] = function($c) {
-        return function ($request, $response, $methods) use ($c) {
+        return function($request, $response, $methods) use ($c) {
             return $response->withJson([
                 'code' => 405,
                 'msg'  => 'method not allowed',
@@ -87,7 +87,7 @@ if (!env('APP_DEBUG', false)) {
 
     // ErrorHandler
     $container['errorHandler'] = function($c) {
-        return function ($request, $response, $error) use ($c) {
+        return function($request, $response, $error) use ($c) {
             $c['logger']->error(null, [
                     'message' => $error->getMessage(),
                     'file'    => $error->getFile(),
@@ -107,7 +107,7 @@ if (!env('APP_DEBUG', false)) {
 
     // PHPErrorHandler
     $container['phpErrorHandler'] = function($c) {
-        return function ($request, $response, $error) use ($c) {
+        return function($request, $response, $error) use ($c) {
             $c['logger']->error(null, [
                     'message' => $error->getMessage(),
                     'file'    => $error->getFile(),
