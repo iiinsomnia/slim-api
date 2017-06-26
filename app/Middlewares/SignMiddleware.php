@@ -28,6 +28,7 @@ class SignMiddleware
         $accessSign = $request->getHeader('Access-Sign');
         $accessTime = $request->getHeader('Access-Time');
         $uuid = $request->getHeader('Access-UUID');
+        $mode = $request->getHeader('Access-Mode');
 
         if (empty($accessSign) || empty($accessTime) || empty($uuid)) {
             return $response->withJson([
@@ -39,6 +40,17 @@ class SignMiddleware
         // 验签
         $path = $request->getUri()->getPath();
         $query = $request->getQueryParams();
+
+        // debug模式返回签名
+        if (!empty($mode) && $mode[0] === 'debug') {
+            $sign = $this->_generateSign($uuid[0], $accessTime[0], $path, $query);
+
+            return $response->withJson([
+                'code' => $this->code,
+                'msg'  => $this->msg,
+                'sign' => $sign,
+            ], 200);
+        }
 
         $success = $this->auth($uuid[0], $accessTime[0], $accessSign[0], $path, $query);
 
@@ -68,15 +80,9 @@ class SignMiddleware
             }
         }
 
-        $token = $this->container->AuthCache->getLoginToken($uuid);
+        $sign = $this->_generateSign($uuid, $accessTime, $path, $query);
 
-        array_shift($query);
-        $query['token'] = $token;
-        $query['timestamp'] = $accessTime;
-
-        $signUrl = sprintf("%s?%s", $path, http_build_query($query));
-
-        if (strtolower($accessSign) != md5($signUrl)) {
+        if (strtolower($accessSign) != $sign) {
             $this->code = -1;
             $this->msg = '验签失败';
 
@@ -84,5 +90,20 @@ class SignMiddleware
         }
 
         return true;
+    }
+
+    // 生成签名
+    private function _generateSign($uuid, $accessTime, $path, $query)
+    {
+        $token = $this->container->AuthCache->getLoginToken($uuid);
+
+        array_shift($query);
+        $query['token'] = $token;
+        $query['timestamp'] = $accessTime;
+
+        $signUrl = sprintf("%s?%s", $path, http_build_query($query));
+        $sign = md5($signUrl);
+
+        return $sign;
     }
 }
