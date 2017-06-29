@@ -1,6 +1,5 @@
 <?php
-$params = require(__DIR__ . '/params.php');
-
+// settings
 return [
     'settings' => [
         'debug'                  => env('APP_DEBUG', false),
@@ -50,6 +49,6 @@ return [
             'level' => \Monolog\Logger::DEBUG,
         ],
     ],
-    'params' => $params,
+    'params' => require __DIR__ . '/params.php',
 ];
 ?>
