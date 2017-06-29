@@ -49,7 +49,7 @@ class Auth
             return;
         }
 
-        $token = $this->signIn($this->uuid, $user);
+        $token = $this->signIn($user);
 
         $resp = ['token' => $token];
 
@@ -79,7 +79,7 @@ class Auth
         $data['last_login_time'] = $loginTime;
         $data['duration'] = $duration;
 
-        $this->container->AuthCache->setAuthData($data['phone'], $this->uuid, $token, $data);
+        $this->container->AuthCache->setLoginData($data['phone'], $this->uuid, $token, $data);
 
         return $token;
     }

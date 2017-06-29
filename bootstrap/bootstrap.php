@@ -8,8 +8,8 @@ $container['db'] = function($c) {
 
     $capsule = new \Illuminate\Database\Capsule\Manager;
 
-    foreach ($connections as $k => $v) {
-        $capsule->addConnection($v, $k);
+    foreach ($connections as $name => $config) {
+        $capsule->addConnection($config, $name);
     }
 
     $capsule->setAsGlobal();
@@ -116,6 +116,21 @@ if (!env('APP_DEBUG', false)) {
                 'msg'  => 'server internal error',
             ], 200);
         };
+    };
+}
+
+// Providers
+$providers = array_merge(
+    require __DIR__ . '/../providers/dao.php',
+    require __DIR__ . '/../providers/cache.php',
+    require __DIR__ . '/../providers/service.php'
+);
+
+foreach ($providers as $k => $v) {
+    $container[$k] = function($c) use ($v) {
+        $instance = new $v($c);
+
+        return $instance;
     };
 }
 ?>

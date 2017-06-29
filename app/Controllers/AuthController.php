@@ -26,7 +26,7 @@ class AuthController extends Controller
             return $this->json($response);;
         }
 
-        $this->container->Auth->handleLogin($input, $this->code, $this->msg, $this->data);
+        $this->container->Auth->handleLogin($input, $this->code, $this->msg, $this->resp);
 
         return $this->json($response);
     }

@@ -28,7 +28,6 @@ class SignMiddleware
         $accessSign = $request->getHeader('Access-Sign');
         $accessTime = $request->getHeader('Access-Time');
         $uuid = $request->getHeader('Access-UUID');
-        $mode = $request->getHeader('Access-Mode');
 
         if (empty($accessSign) || empty($accessTime) || empty($uuid)) {
             return $response->withJson([
@@ -41,15 +40,19 @@ class SignMiddleware
         $path = $request->getUri()->getPath();
         $query = $request->getQueryParams();
 
-        // debug模式返回签名
-        if (!empty($mode) && $mode[0] === 'debug') {
-            $sign = $this->_generateSign($uuid[0], $accessTime[0], $path, $query);
+        if (env('APP_DEBUG', false)) {
+            // debug模式返回签名
+            $mode = $request->getHeader('Access-Mode');
 
-            return $response->withJson([
-                'code' => $this->code,
-                'msg'  => $this->msg,
-                'sign' => $sign,
-            ], 200);
+            if (!empty($mode) && $mode[0] === 'debug') {
+                $sign = $this->_generateSign($uuid[0], $accessTime[0], $path, $query);
+
+                return $response->withJson([
+                    'code' => $this->code,
+                    'msg'  => $this->msg,
+                    'sign' => $sign,
+                ], 200);
+            }
         }
 
         $success = $this->auth($uuid[0], $accessTime[0], $accessSign[0], $path, $query);
