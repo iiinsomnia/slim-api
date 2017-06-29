@@ -64,9 +64,9 @@ $providers = array_merge(
     require __DIR__ . '/../providers/command.php'
 );
 
-foreach ($providers as $k => $v) {
-    $container[$k] = function($c) use ($v) {
-        $instance = new $v($c);
+foreach ($providers as $alias => $obj) {
+    $container[$alias] = function($c) use ($obj) {
+        $instance = new $obj($c);
 
         return $instance;
     };
