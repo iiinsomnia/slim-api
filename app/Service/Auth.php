@@ -13,7 +13,7 @@ class Auth
         $this->container = $c;
 
         $uuid = $c->request->getHeader('Access-UUID');
-        $this->uuid = $uuid[0];
+        $this->uuid = !empty($uuid) ? $uuid[0] : '';
     }
 
     public function loginRules()
@@ -33,6 +33,13 @@ class Auth
     // 处理登录请求
     public function handleLogin($input, &$code, &$msg, &$resp)
     {
+        if (empty($this->uuid)) {
+            $code = -1;
+            $msg = 'unknown uuid';
+
+            return;
+        }
+
         $user = $this->container->UserDao->getByPhone($input['phone']);
 
         if (!$user) {
@@ -57,8 +64,15 @@ class Auth
     }
 
     // 处理退出请求
-    public function handleLogout()
+    public function handleLogout(&$code, &$msg)
     {
+        if (empty($this->uuid)) {
+            $code = -1;
+            $msg = 'unknown uuid';
+
+            return;
+        }
+
         $this->container->AuthCache->logoutByUUID($this->uuid);
 
         return;

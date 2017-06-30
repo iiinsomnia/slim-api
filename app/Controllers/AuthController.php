@@ -33,7 +33,7 @@ class AuthController extends Controller
 
     public function logout($request, $response, $args)
     {
-        $this->container->Auth->handleLogout();
+        $this->container->Auth->handleLogout($this->code, $this->msg);
 
         return $this->json($response);
     }
