@@ -9,12 +9,12 @@
 * 支持.env环境配置
 * 使用依赖注入开发
 * 支持邮件推送系统错误日志
-* 内置登录和验签模块
+* 内含登录和验签模块
 
 ### 使用：
 
 ```sh
-# get the framework and dependency libraries
+# download and get the framework and dependency libraries
 composer update
 ```
 
@@ -24,9 +24,7 @@ php cli greet IIInsomnia
 
 # output
 Hello IIInsomnia
-```
 
-```sh
 # display help message
 php cli greet -h
 ```
@@ -35,7 +33,7 @@ php cli greet -h
 
 * 服务器虚拟目录指向 `public` 目录
 * 确保 `logs` 目录可写
-* 内置MySQL、Mongo、Redis使用示例
+* 内含MySQL、Mongo、Redis使用示例
 * 默认签名规则：请求URL(不包括域名) + 用户登录token + 请求时间戳，取md5值
 
 ### 参考
