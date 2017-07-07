@@ -33,6 +33,7 @@ php cli greet -h
 
 * 服务器虚拟目录指向 `public` 目录
 * 确保 `logs` 目录可写
+* 导入 `demo.sql`
 * .env.example -> .env
 * 内含MySQL、Mongo、Redis使用示例
 * 默认签名规则：请求URL(不包括域名) + 用户登录token + 请求时间戳，取md5值
