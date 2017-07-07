@@ -51,8 +51,12 @@ $container['redis'] = function($c) {
 $container['logger'] = function($c) {
     $config = $c->get('settings')['logger'];
 
-    $logger = new Monolog\Logger($config['name']);
-    $logger->pushHandler(new Monolog\Handler\StreamHandler($config['path'], $config['level']));
+    $logger = new \Monolog\Logger($config['name']);
+
+    $handler = new \Monolog\Handler\StreamHandler($config['path'], $config['level']);
+    $handler->setFormatter(new \Monolog\Formatter\LineFormatter(null, null, true, true));
+
+    $logger->pushHandler($handler);
 
     return $logger;
 };
@@ -80,15 +84,11 @@ if (!env('APP_DEBUG', false)) {
 
     // ErrorHandler
     $container['errorHandler'] = function($c) {
-        return function($request, $response, $error) use ($c) {
-            $c['logger']->error(null, [
-                    'message' => $error->getMessage(),
-                    'file'    => $error->getFile(),
-                    'line'    => $error->getLine(),
-                ]);
+        return function($request, $response, $e) use ($c) {
+            $c->logger->error(sprintf("%s in %s:%s\n%s", $e->getMessage(), $e->getFile(), $e->getLine(), $e->getTraceAsString()));
 
             if (env('ERROR_MAIL', false)) {
-                \App\Helpers\MailerHelper::sendErrorMail($error);
+                \App\Helpers\MailerHelper::sendErrorMail($e);
             }
 
             return $response->withJson([
@@ -100,15 +100,11 @@ if (!env('APP_DEBUG', false)) {
 
     // PHPErrorHandler
     $container['phpErrorHandler'] = function($c) {
-        return function($request, $response, $error) use ($c) {
-            $c['logger']->error(null, [
-                    'message' => $error->getMessage(),
-                    'file'    => $error->getFile(),
-                    'line'    => $error->getLine(),
-                ]);
+        return function($request, $response, $e) use ($c) {
+            $c->logger->error(sprintf("%s in %s:%s\n%s", $e->getMessage(), $e->getFile(), $e->getLine(), $e->getTraceAsString()));
 
             if (env('ERROR_MAIL', false)) {
-                \App\Helpers\MailerHelper::sendErrorMail($error);
+                \App\Helpers\MailerHelper::sendErrorMail($e);
             }
 
             return $response->withJson([

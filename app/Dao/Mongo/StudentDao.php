@@ -8,7 +8,7 @@ class StudentDao extends Mongo
 {
     // constructor receives container instance
     function __construct(ContainerInterface $c){
-        parent::__construct($c, 'student');
+        parent::__construct($c, 'demo', 'student');
     }
 
     public function getAll()
