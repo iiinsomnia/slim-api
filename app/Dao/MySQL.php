@@ -460,14 +460,14 @@ class MySQL
             return [];
         }
 
+        if (!$multiple) {
+            return get_object_vars($data);
+        }
+
         $result = [];
 
-        if ($multiple) {
-            foreach ($data as $obj) {
-                $result[] = get_object_vars($obj);
-            }
-        } else {
-            $result = get_object_vars($data);
+        foreach ($data as $obj) {
+            $result[] = get_object_vars($obj);
         }
 
         return $result;
