@@ -196,6 +196,22 @@ class MySQL
     }
 
     /**
+     * SQL查询记录
+     * @param string $sql
+     * @param array $binds
+     * @return array 返回查询结果
+     */
+    protected function findBySQL($sql, $binds)
+    {
+        $this->_buildIn($sql, $binds);
+        $data = $this->_DB->select($sql, $binds);
+
+        $result = $this->_toArray($data, true);
+
+        return $result;
+    }
+
+    /**
      * 删除记录
      * @param array $query 查询条件，如：
      *        [
